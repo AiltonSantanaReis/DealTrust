@@ -1,0 +1,19 @@
+{
+  "name": "@dealtrust/core",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Regras de dominio puras do DealTrust.",
+  "exports": {
+    ".": {
+      "types": "./src/index.ts",
+      "default": "./src/index.ts"
+    }
+  },
+  "scripts": {
+    "test": "vitest",
+    "test:run": "vitest run",
+    "typecheck": "tsc --noEmit"
+  }
+}
+

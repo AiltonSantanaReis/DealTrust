@@ -65,6 +65,10 @@ packages/contracts
     offers/
     alerts/
 
+packages/core
+  src/
+    pricing/
+
 packages/db
   src/
     schema/
@@ -106,4 +110,3 @@ Fase 3 - Alto volume:
 - Valkey docs: https://valkey.io/topics/
 - OpenSearch docs: https://docs.opensearch.org/latest/
 - ClickHouse docs: https://clickhouse.com/docs/intro
-

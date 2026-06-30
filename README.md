@@ -28,6 +28,7 @@ apps/
   admin/        Painel operacional
   mobile/       App Expo/React Native, depois da validacao
 packages/
+  core/         Regras de dominio puras e testaveis
   contracts/    Schemas, DTOs e tipos compartilhados
   db/           Schema, migrations e acesso ao banco
   config/       Configuracoes compartilhadas
@@ -56,4 +57,3 @@ O MVP deve validar confianca e recorrencia:
 - [Modelo de Dados Inicial](docs/03-modelo-dados-inicial.md)
 - [Praticas de Engenharia](docs/04-praticas-engenharia.md)
 - [ADR 0001 - Stack Inicial](docs/adr/0001-stack-inicial.md)
-
