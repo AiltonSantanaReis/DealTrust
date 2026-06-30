@@ -46,4 +46,3 @@ function assertSameCurrency(expected: CurrencyCode, money: Money, fieldName: str
     throw new Error(`${fieldName} currency must match productPrice currency.`);
   }
 }
-

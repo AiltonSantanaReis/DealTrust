@@ -1,6 +1,12 @@
 # packages/contracts
 
-Pacote para schemas, DTOs, tipos compartilhados e contratos de API.
+Schemas, DTOs e tipos compartilhados do DealTrust.
 
-Preferencia: Zod ou biblioteca equivalente para validar entrada e compartilhar tipos entre backend, web, admin e mobile.
+Este pacote define contratos de borda para API, web, admin e futuro mobile. Toda entrada externa relevante deve passar por um schema explicito antes de chegar nas regras de dominio ou persistencia.
 
+Responsabilidades iniciais:
+
+- Auth: cadastro, login e usuario autenticado.
+- Produtos: criacao, variacoes e busca.
+- Ofertas: cadastro de oferta e snapshot de preco.
+- Alertas: preco alvo, queda percentual e menor preco historico.

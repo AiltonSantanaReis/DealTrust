@@ -183,19 +183,27 @@ function chooseLabel(input: {
   return "regular_price";
 }
 
-function calculateDiscountPercent(referenceAmountCents: number, currentAmountCents: number): number {
+function calculateDiscountPercent(
+  referenceAmountCents: number,
+  currentAmountCents: number
+): number {
   if (referenceAmountCents === 0) {
     return 0;
   }
 
-  return Number((((referenceAmountCents - currentAmountCents) / referenceAmountCents) * 100).toFixed(2));
+  return Number(
+    (((referenceAmountCents - currentAmountCents) / referenceAmountCents) * 100).toFixed(2)
+  );
 }
 
 function daysToMilliseconds(days: number): number {
   return days * 24 * 60 * 60 * 1000;
 }
 
-function assertSnapshotsShareCurrency(currentPrice: Money, snapshots: readonly PriceSnapshot[]): void {
+function assertSnapshotsShareCurrency(
+  currentPrice: Money,
+  snapshots: readonly PriceSnapshot[]
+): void {
   for (const snapshot of snapshots) {
     if (snapshot.finalPrice.currency !== currentPrice.currency) {
       throw new Error("All price snapshots must use the same currency as currentPrice.");

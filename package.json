@@ -9,14 +9,17 @@
     "pnpm": ">=11 <12"
   },
   "scripts": {
+    "verify": "pnpm lint && pnpm typecheck && pnpm test:run",
     "dev": "pnpm -r --parallel --if-present dev",
     "build": "pnpm -r --if-present build",
     "test": "pnpm -r --if-present test",
     "test:run": "pnpm -r --if-present test:run",
-    "lint": "pnpm -r --if-present lint",
+    "lint": "biome check .",
+    "format": "biome check --write .",
     "typecheck": "pnpm -r --if-present typecheck"
   },
   "devDependencies": {
+    "@biomejs/biome": "^2.5.1",
     "@types/node": "^24.13.2",
     "typescript": "^6.0.3",
     "vitest": "^4.1.9"

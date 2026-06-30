@@ -32,4 +32,3 @@ describe("calculateFinalPrice", () => {
     expect(finalPrice).toEqual(createMoney(0));
   });
 });
-
