@@ -1,0 +1,48 @@
+name: dealtrust
+
+services:
+  postgres:
+    image: postgres:18-alpine
+    container_name: dealtrust-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: dealtrust
+      POSTGRES_USER: dealtrust
+      POSTGRES_PASSWORD: dealtrust
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U dealtrust -d dealtrust"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  valkey:
+    image: valkey/valkey:9-alpine
+    container_name: dealtrust-valkey
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    volumes:
+      - valkey_data:/data
+    command: ["valkey-server", "--appendonly", "yes"]
+    healthcheck:
+      test: ["CMD", "valkey-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  mailpit:
+    image: axllent/mailpit:v1.27
+    container_name: dealtrust-mailpit
+    restart: unless-stopped
+    ports:
+      - "1025:1025"
+      - "8025:8025"
+
+volumes:
+  postgres_data:
+  valkey_data:
+

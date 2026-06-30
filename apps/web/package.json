@@ -1,0 +1,8 @@
+{
+  "name": "@dealtrust/web",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "App publico e PWA do DealTrust."
+}
+

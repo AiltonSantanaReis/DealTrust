@@ -1,0 +1,19 @@
+{
+  "name": "dealtrust",
+  "version": "0.1.0",
+  "private": true,
+  "description": "DealTrust - plataforma de inteligencia de compras, historico de precos e alertas confiaveis.",
+  "packageManager": "pnpm@11.7.0",
+  "engines": {
+    "node": ">=24 <25",
+    "pnpm": ">=11 <12"
+  },
+  "scripts": {
+    "dev": "pnpm -r --parallel --if-present dev",
+    "build": "pnpm -r --if-present build",
+    "test": "pnpm -r --if-present test",
+    "lint": "pnpm -r --if-present lint",
+    "typecheck": "pnpm -r --if-present typecheck"
+  }
+}
+
