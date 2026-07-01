@@ -4,12 +4,7 @@ import * as schema from "./schema/index.js";
 
 export type Database = PostgresJsDatabase<typeof schema>;
 export type SqlClient = Sql;
-
-export type CreateSqlClientOptions = {
-  readonly max?: number;
-  readonly idle_timeout?: number;
-  readonly connect_timeout?: number;
-};
+export type CreateSqlClientOptions = NonNullable<Parameters<typeof postgres>[1]>;
 
 export function createSqlClient(
   databaseUrl: string,

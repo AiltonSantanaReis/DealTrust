@@ -12,9 +12,27 @@ services:
     ports:
       - "5432:5432"
     volumes:
-      - postgres_data:/var/lib/postgresql/data
+      - postgres_data:/var/lib/postgresql
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U dealtrust -d dealtrust"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  postgres-test:
+    image: postgres:18-alpine
+    container_name: dealtrust-postgres-test
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: dealtrust_test
+      POSTGRES_USER: dealtrust
+      POSTGRES_PASSWORD: dealtrust
+    ports:
+      - "5433:5432"
+    volumes:
+      - postgres_test_data:/var/lib/postgresql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U dealtrust -d dealtrust_test"]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -44,5 +62,5 @@ services:
 
 volumes:
   postgres_data:
+  postgres_test_data:
   valkey_data:
-
