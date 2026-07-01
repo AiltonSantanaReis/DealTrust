@@ -1,4 +1,5 @@
 import {
+  type AuthUser,
   type CategoryListResponse,
   type CategoryResponse,
   categoryListQuerySchema,
@@ -18,8 +19,12 @@ import {
   Param,
   Patch,
   Post,
-  Query
+  Query,
+  Req
 } from "@nestjs/common";
+import { createAuditRequestContext } from "../audit/audit-request-context.js";
+import type { AuthenticatedRequest } from "../auth/authenticated-request.js";
+import { CurrentUser } from "../auth/current-user.decorator.js";
 import { RequireRoles } from "../auth/require-roles.decorator.js";
 import { parseRequestBody, parseRequestQuery, parseRouteParam } from "../shared/validation.js";
 import { CategoriesService } from "./categories.service.js";
@@ -30,9 +35,16 @@ export class AdminCategoriesController {
   constructor(@Inject(CategoriesService) private readonly categoriesService: CategoriesService) {}
 
   @Post()
-  async create(@Body() body: unknown): Promise<CategoryResponse> {
-    const request = parseRequestBody(createCategoryRequestSchema, body);
-    const category = await this.categoriesService.create(request);
+  async create(
+    @Body() body: unknown,
+    @CurrentUser() user: AuthUser,
+    @Req() request: AuthenticatedRequest
+  ): Promise<CategoryResponse> {
+    const parsedBody = parseRequestBody(createCategoryRequestSchema, body);
+    const category = await this.categoriesService.create(parsedBody, {
+      actor: user,
+      request: createAuditRequestContext(request)
+    });
 
     return categoryResponseSchema.parse(category);
   }
@@ -54,19 +66,34 @@ export class AdminCategoriesController {
   }
 
   @Patch(":id")
-  async update(@Param("id") id: unknown, @Body() body: unknown): Promise<CategoryResponse> {
+  async update(
+    @Param("id") id: unknown,
+    @Body() body: unknown,
+    @CurrentUser() user: AuthUser,
+    @Req() request: AuthenticatedRequest
+  ): Promise<CategoryResponse> {
     const categoryId = parseRouteParam(publicIdSchema, id);
-    const request = parseRequestBody(updateCategoryRequestSchema, body);
-    const category = await this.categoriesService.update(categoryId, request);
+    const parsedBody = parseRequestBody(updateCategoryRequestSchema, body);
+    const category = await this.categoriesService.update(categoryId, parsedBody, {
+      actor: user,
+      request: createAuditRequestContext(request)
+    });
 
     return categoryResponseSchema.parse(category);
   }
 
   @Delete(":id")
   @HttpCode(204)
-  async archive(@Param("id") id: unknown): Promise<void> {
+  async archive(
+    @Param("id") id: unknown,
+    @CurrentUser() user: AuthUser,
+    @Req() request: AuthenticatedRequest
+  ): Promise<void> {
     const categoryId = parseRouteParam(publicIdSchema, id);
 
-    await this.categoriesService.archive(categoryId);
+    await this.categoriesService.archive(categoryId, {
+      actor: user,
+      request: createAuditRequestContext(request)
+    });
   }
 }

@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { createPriceAlertRequestSchema } from "./alerts.js";
+import { adminAuditLogListQuerySchema } from "./audit.js";
 import { authSessionSchema, loginRequestSchema, registerRequestSchema } from "./auth.js";
 import {
   brandListQuerySchema,
@@ -10,16 +11,31 @@ import {
   updateCategoryRequestSchema
 } from "./catalog.js";
 import { moneySchema } from "./common.js";
-import { createOfferRequestSchema } from "./offers.js";
+import {
+  adminOfferListQuerySchema,
+  createAdminOfferRequestSchema,
+  createAdminPriceSnapshotRequestSchema,
+  createOfferRequestSchema,
+  updateAdminOfferRequestSchema
+} from "./offers.js";
 import {
   adminProductListQuerySchema,
+  adminProductVariantListQuerySchema,
   createAdminProductRequestSchema,
+  createAdminProductVariantRequestSchema,
   productSearchQuerySchema,
-  updateAdminProductRequestSchema
+  updateAdminProductRequestSchema,
+  updateAdminProductVariantRequestSchema
 } from "./products.js";
+import {
+  adminStoreListQuerySchema,
+  createAdminStoreRequestSchema,
+  updateAdminStoreRequestSchema
+} from "./stores.js";
 
 const productVariantId = "53cf458e-8c72-48f4-bcd4-9b4a8d649c7c";
 const storeId = "2f93c130-e845-47db-9472-6d5c1ac6f9ab";
+const productId = "c37d891d-90ce-4d39-88d6-0e898ac2eb1e";
 
 describe("auth contracts", () => {
   it("normalizes registration email and name", () => {
@@ -153,6 +169,46 @@ describe("offer contracts", () => {
       })
     ).toThrow();
   });
+
+  it("accepts admin offer payloads and defaults stock state", () => {
+    const parsed = createAdminOfferRequestSchema.parse({
+      productVariantId,
+      storeId,
+      url: "https://example.com/produto/123",
+      currentPrice: { amountCents: 299_90, currency: "BRL" }
+    });
+
+    expect(parsed.inStock).toBe(true);
+    expect(parsed.status).toBe("active");
+  });
+
+  it("rejects admin offer updates without fields", () => {
+    expect(() => updateAdminOfferRequestSchema.parse({})).toThrow();
+  });
+
+  it("accepts admin offer filters", () => {
+    const parsed = adminOfferListQuerySchema.parse({
+      limit: "10",
+      productVariantId,
+      status: "active"
+    });
+
+    expect(parsed.limit).toBe(10);
+    expect(parsed.productVariantId).toBe(productVariantId);
+  });
+
+  it("accepts manual price snapshots with optional commercial adjustments", () => {
+    const parsed = createAdminPriceSnapshotRequestSchema.parse({
+      offerId: "d37d891d-90ce-4d39-88d6-0e898ac2eb1e",
+      price: { amountCents: 259_90, currency: "BRL" },
+      available: true,
+      capturedAt: "2026-01-01T10:00:00.000Z",
+      couponDiscount: { amountCents: 10_00, currency: "BRL" }
+    });
+
+    expect(parsed.capturedAt).toBeInstanceOf(Date);
+    expect(parsed.couponDiscount?.amountCents).toBe(10_00);
+  });
 });
 
 describe("alert contracts", () => {
@@ -211,5 +267,75 @@ describe("product search contract", () => {
 
     expect(parsed.limit).toBe(25);
     expect(parsed.status).toBe("draft");
+  });
+
+  it("defaults admin product variants to active status", () => {
+    const parsed = createAdminProductVariantRequestSchema.parse({
+      productId,
+      color: "Black"
+    });
+
+    expect(parsed.status).toBe("active");
+  });
+
+  it("rejects admin product variant updates without fields", () => {
+    expect(() => updateAdminProductVariantRequestSchema.parse({})).toThrow();
+  });
+
+  it("accepts admin product variant filters", () => {
+    const parsed = adminProductVariantListQuerySchema.parse({
+      limit: "15",
+      productId,
+      status: "active"
+    });
+
+    expect(parsed.limit).toBe(15);
+    expect(parsed.productId).toBe(productId);
+  });
+});
+
+describe("store contracts", () => {
+  it("normalizes store domains and defaults review state", () => {
+    const parsed = createAdminStoreRequestSchema.parse({
+      name: "  Example Store  ",
+      domain: "  SHOP.EXAMPLE.COM "
+    });
+
+    expect(parsed).toEqual({
+      name: "Example Store",
+      domain: "shop.example.com",
+      reputationScore: 0,
+      status: "pending_review",
+      type: "retailer"
+    });
+  });
+
+  it("rejects store updates without fields", () => {
+    expect(() => updateAdminStoreRequestSchema.parse({})).toThrow();
+  });
+
+  it("accepts store filters", () => {
+    const parsed = adminStoreListQuerySchema.parse({
+      limit: "30",
+      status: "active",
+      type: "marketplace"
+    });
+
+    expect(parsed.limit).toBe(30);
+    expect(parsed.status).toBe("active");
+  });
+});
+
+describe("audit contracts", () => {
+  it("accepts admin audit filters", () => {
+    const parsed = adminAuditLogListQuerySchema.parse({
+      limit: "50",
+      action: "update",
+      entityType: "offer",
+      entityId: productVariantId
+    });
+
+    expect(parsed.limit).toBe(50);
+    expect(parsed.action).toBe("update");
   });
 });

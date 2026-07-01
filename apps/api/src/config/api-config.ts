@@ -36,7 +36,11 @@ const apiConfigSchema = z.object({
   DATABASE_MAX_CONNECTIONS: z.coerce.number().int().min(1).max(50).default(10),
   VALKEY_URL: redisUrlSchema.default("redis://localhost:6379"),
   AUTH_JWT_SECRET: z.string().min(32).optional(),
-  AUTH_ACCESS_TOKEN_TTL_SECONDS: z.coerce.number().int().min(60).max(86_400).default(900)
+  AUTH_ACCESS_TOKEN_TTL_SECONDS: z.coerce.number().int().min(60).max(86_400).default(900),
+  API_BODY_LIMIT_BYTES: z.coerce.number().int().min(16_384).max(10_485_760).default(1_048_576),
+  API_RATE_LIMIT_WINDOW_SECONDS: z.coerce.number().int().min(1).max(3_600).default(60),
+  API_RATE_LIMIT_MAX_REQUESTS: z.coerce.number().int().min(1).max(10_000).default(300),
+  API_CORS_ORIGINS: z.string().default("")
 });
 
 export type ApiEnvironment = "development" | "test" | "production";
@@ -49,6 +53,10 @@ export type ApiConfig = {
   readonly valkeyUrl: string;
   readonly authJwtSecret: string;
   readonly authAccessTokenTtlSeconds: number;
+  readonly apiBodyLimitBytes: number;
+  readonly apiRateLimitWindowSeconds: number;
+  readonly apiRateLimitMaxRequests: number;
+  readonly apiCorsOrigins: readonly string[];
 };
 
 export function loadApiConfig(env: NodeJS.ProcessEnv): ApiConfig {
@@ -73,6 +81,17 @@ export function loadApiConfig(env: NodeJS.ProcessEnv): ApiConfig {
     databaseMaxConnections: parsed.data.DATABASE_MAX_CONNECTIONS,
     valkeyUrl: parsed.data.VALKEY_URL,
     authJwtSecret: parsed.data.AUTH_JWT_SECRET ?? localAuthJwtSecret,
-    authAccessTokenTtlSeconds: parsed.data.AUTH_ACCESS_TOKEN_TTL_SECONDS
+    authAccessTokenTtlSeconds: parsed.data.AUTH_ACCESS_TOKEN_TTL_SECONDS,
+    apiBodyLimitBytes: parsed.data.API_BODY_LIMIT_BYTES,
+    apiRateLimitWindowSeconds: parsed.data.API_RATE_LIMIT_WINDOW_SECONDS,
+    apiRateLimitMaxRequests: parsed.data.API_RATE_LIMIT_MAX_REQUESTS,
+    apiCorsOrigins: parseCorsOrigins(parsed.data.API_CORS_ORIGINS)
   };
+}
+
+function parseCorsOrigins(value: string): readonly string[] {
+  return value
+    .split(",")
+    .map((origin) => origin.trim())
+    .filter((origin) => origin.length > 0);
 }

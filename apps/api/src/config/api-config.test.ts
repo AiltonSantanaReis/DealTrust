@@ -12,7 +12,11 @@ describe("loadApiConfig", () => {
       databaseMaxConnections: 10,
       valkeyUrl: "redis://localhost:6379",
       authJwtSecret: "dealtrust-local-development-secret-change-before-production",
-      authAccessTokenTtlSeconds: 900
+      authAccessTokenTtlSeconds: 900,
+      apiBodyLimitBytes: 1_048_576,
+      apiRateLimitWindowSeconds: 60,
+      apiRateLimitMaxRequests: 300,
+      apiCorsOrigins: []
     });
   });
 
@@ -23,13 +27,21 @@ describe("loadApiConfig", () => {
       DATABASE_URL: "postgresql://dealtrust:dealtrust@localhost:5432/dealtrust_test",
       DATABASE_MAX_CONNECTIONS: "3",
       VALKEY_URL: "redis://localhost:6379",
-      AUTH_ACCESS_TOKEN_TTL_SECONDS: "1200"
+      AUTH_ACCESS_TOKEN_TTL_SECONDS: "1200",
+      API_BODY_LIMIT_BYTES: "2097152",
+      API_RATE_LIMIT_WINDOW_SECONDS: "30",
+      API_RATE_LIMIT_MAX_REQUESTS: "120",
+      API_CORS_ORIGINS: "https://app.example.com,https://admin.example.com"
     });
 
     expect(config.port).toBe(0);
     expect(config.databaseMaxConnections).toBe(3);
     expect(config.environment).toBe("test");
     expect(config.authAccessTokenTtlSeconds).toBe(1200);
+    expect(config.apiBodyLimitBytes).toBe(2_097_152);
+    expect(config.apiRateLimitWindowSeconds).toBe(30);
+    expect(config.apiRateLimitMaxRequests).toBe(120);
+    expect(config.apiCorsOrigins).toEqual(["https://app.example.com", "https://admin.example.com"]);
   });
 
   it("rejects invalid database URLs", () => {

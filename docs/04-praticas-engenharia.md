@@ -1,57 +1,58 @@
-# Praticas de Engenharia
+# Práticas de Engenharia
 
-## Padroes obrigatorios desde o inicio
+## Padrões obrigatórios desde o início
 
 - TypeScript em modo estrito.
-- Validacao de entrada em todas as bordas de API.
+- Validação de entrada em todas as bordas de API.
 - Contratos compartilhados em `packages/contracts`.
 - OpenAPI publicado pelo backend.
 - Logs estruturados com correlation id.
 - Migrations versionadas.
-- Testes de regras de negocio antes de interface.
+- Testes de regras de negócio antes de interface.
 - Feature flags para funcionalidades arriscadas.
-- Rate limit em auth, busca, alertas e endpoints publicos sensiveis.
-- Auditoria para toda acao administrativa.
+- Rate limit em autenticação, busca, alertas e endpoints públicos sensíveis.
+- Auditoria completa para toda ação administrativa, com antes/depois, ator, entidade, origem da requisição e mascaramento de dados sensíveis.
 
-## Seguranca e privacidade
+## Segurança e privacidade
 
 - Senhas com Argon2id ou algoritmo equivalente recomendado.
-- Sessao e refresh token com rotacao e revogacao.
-- Consentimento claro para notificacoes e preferencias.
-- Exclusao de conta e exportacao de dados pessoais.
-- Separacao entre dados publicos e privados.
-- Minimo de dados sensiveis.
-- Preparacao para LGPD desde o MVP.
+- Sessão e refresh token com rotação e revogação.
+- Consentimento claro para notificações e preferências.
+- Exclusão de conta e exportação de dados pessoais.
+- Separação entre dados públicos e privados.
+- Mínimo de dados sensíveis.
+- Headers HTTP defensivos, limite de corpo de requisição e CORS restritivo por configuração.
+- Preparação para LGPD desde o MVP.
 
 ## Qualidade de dados
 
-DealTrust depende de confianca. Dados ruins sao mais perigosos do que falta de dados.
+DealTrust depende de confiança. Dados incorretos prejudicam a decisão do usuário e a credibilidade operacional.
 
-- Toda fonte de preco deve ter origem rastreavel.
-- Toda correcao manual deve gerar auditoria.
-- Matching automatico deve permitir revisao humana.
-- Ofertas suspeitas nao entram no ranking publico sem criterio explicito.
-- Coleta por scraping deve ser excecao, com revisao juridica e tecnica.
+- Toda fonte de preço deve ter origem rastreável.
+- Toda correção manual deve gerar auditoria.
+- Matching automático deve permitir revisão humana.
+- Ofertas inconsistentes não entram no ranking público sem critério explícito.
+- Coleta por scraping deve ser exceção, com revisão jurídica e técnica.
 
 ## Observabilidade
 
 Medir desde cedo:
 
-- Latencia de API.
+- Latência de API.
 - Erros por endpoint.
 - Jobs pendentes e falhos.
 - Falhas de coleta.
 - Alertas disparados.
 - Cliques em ofertas.
-- Produtos sem historico suficiente.
-- Lojas com alta taxa de suspeita.
+- Produtos sem histórico suficiente.
+- Lojas com alta taxa de inconsistência operacional.
 
 ## Testes
 
 Prioridade:
 
-1. Regras de preco bom, menor historico e oferta potencialmente enganosa.
-2. Alertas de preco.
-3. Matching de produto e variacao.
-4. Permissoes administrativas.
-5. Fluxos web criticos com Playwright.
+1. Regras de preço relevante, menor histórico e oferta inconsistente.
+2. Alertas de preço.
+3. Matching de produto e variação.
+4. Permissões administrativas.
+5. Fluxos web críticos com Playwright.

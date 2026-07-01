@@ -7,8 +7,8 @@ export type PriceSnapshot = {
 
 export type PriceOpportunityConfig = {
   readonly goodPriceMarginPercent: number;
-  readonly suspiciousIncreasePercent: number;
-  readonly suspiciousLookbackDays: number;
+  readonly inconsistentIncreasePercent: number;
+  readonly inconsistentLookbackDays: number;
 };
 
 export type PriceOpportunityLabel =
@@ -17,7 +17,7 @@ export type PriceOpportunityLabel =
   | "regular_price"
   | "wait"
   | "insufficient_history"
-  | "suspicious_discount";
+  | "inconsistent_discount";
 
 export type PriceOpportunityAnalysis = {
   readonly label: PriceOpportunityLabel;
@@ -26,14 +26,14 @@ export type PriceOpportunityAnalysis = {
   readonly historicalLow: Money | null;
   readonly discountFromAveragePercent: number | null;
   readonly isHistoricalLow: boolean;
-  readonly isSuspiciousDiscount: boolean;
+  readonly hasInconsistentDiscount: boolean;
   readonly snapshotCount: number;
 };
 
 export const defaultPriceOpportunityConfig: PriceOpportunityConfig = {
   goodPriceMarginPercent: 8,
-  suspiciousIncreasePercent: 20,
-  suspiciousLookbackDays: 14
+  inconsistentIncreasePercent: 20,
+  inconsistentLookbackDays: 14
 };
 
 export function analyzePriceOpportunity(
@@ -53,7 +53,7 @@ export function analyzePriceOpportunity(
       historicalLow: null,
       discountFromAveragePercent: null,
       isHistoricalLow: false,
-      isSuspiciousDiscount: false,
+      hasInconsistentDiscount: false,
       snapshotCount: 0
     };
   }
@@ -65,13 +65,13 @@ export function analyzePriceOpportunity(
     currentPrice.amountCents
   );
   const isHistoricalLow = currentPrice.amountCents <= historicalLow.amountCents;
-  const isSuspiciousDiscount = detectSuspiciousDiscount(currentPrice, snapshots, now, config);
+  const hasInconsistentDiscount = detectInconsistentDiscount(currentPrice, snapshots, now, config);
 
   return {
     label: chooseLabel({
       discountFromAveragePercent,
       isHistoricalLow,
-      isSuspiciousDiscount,
+      hasInconsistentDiscount,
       goodPriceMarginPercent: config.goodPriceMarginPercent
     }),
     currentPrice,
@@ -79,7 +79,7 @@ export function analyzePriceOpportunity(
     historicalLow,
     discountFromAveragePercent,
     isHistoricalLow,
-    isSuspiciousDiscount,
+    hasInconsistentDiscount,
     snapshotCount: snapshots.length
   };
 }
@@ -114,7 +114,7 @@ export function calculateHistoricalLow(snapshots: readonly PriceSnapshot[]): Mon
   }, firstSnapshot.finalPrice);
 }
 
-export function detectSuspiciousDiscount(
+export function detectInconsistentDiscount(
   currentPrice: Money,
   snapshots: readonly PriceSnapshot[],
   now: Date,
@@ -127,7 +127,9 @@ export function detectSuspiciousDiscount(
     return false;
   }
 
-  const lookbackStart = new Date(now.getTime() - daysToMilliseconds(config.suspiciousLookbackDays));
+  const lookbackStart = new Date(
+    now.getTime() - daysToMilliseconds(config.inconsistentLookbackDays)
+  );
 
   const recentSnapshots = snapshots
     .filter((snapshot) => snapshot.capturedAt >= lookbackStart && snapshot.capturedAt <= now)
@@ -153,7 +155,7 @@ export function detectSuspiciousDiscount(
   );
 
   return (
-    increasePercent >= config.suspiciousIncreasePercent &&
+    increasePercent >= config.inconsistentIncreasePercent &&
     discountFromHighestPercent >= config.goodPriceMarginPercent
   );
 }
@@ -161,11 +163,11 @@ export function detectSuspiciousDiscount(
 function chooseLabel(input: {
   readonly discountFromAveragePercent: number;
   readonly isHistoricalLow: boolean;
-  readonly isSuspiciousDiscount: boolean;
+  readonly hasInconsistentDiscount: boolean;
   readonly goodPriceMarginPercent: number;
 }): PriceOpportunityLabel {
-  if (input.isSuspiciousDiscount) {
-    return "suspicious_discount";
+  if (input.hasInconsistentDiscount) {
+    return "inconsistent_discount";
   }
 
   if (input.isHistoricalLow) {
@@ -226,11 +228,11 @@ function assertConfig(config: PriceOpportunityConfig): void {
     throw new Error("goodPriceMarginPercent cannot be negative.");
   }
 
-  if (config.suspiciousIncreasePercent < 0) {
-    throw new Error("suspiciousIncreasePercent cannot be negative.");
+  if (config.inconsistentIncreasePercent < 0) {
+    throw new Error("inconsistentIncreasePercent cannot be negative.");
   }
 
-  if (!Number.isInteger(config.suspiciousLookbackDays) || config.suspiciousLookbackDays < 1) {
-    throw new Error("suspiciousLookbackDays must be a positive integer.");
+  if (!Number.isInteger(config.inconsistentLookbackDays) || config.inconsistentLookbackDays < 1) {
+    throw new Error("inconsistentLookbackDays must be a positive integer.");
   }
 }

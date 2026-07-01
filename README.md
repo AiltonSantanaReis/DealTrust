@@ -1,209 +1,85 @@
 # DealTrust
 
-Backend-first shopping intelligence platform for product catalogs, price history, trusted offers, alerts, and data-driven purchase decisions.
+DealTrust é uma plataforma de inteligência de compras, histórico de preços e alertas. O objetivo do produto é apoiar decisões de compra com dados verificáveis, rastreabilidade operacional e critérios consistentes de qualidade de oferta.
 
-DealTrust is designed as a modular TypeScript monorepo focused on clean backend architecture, data integrity, authentication, role-based access control, testability, and future scalability for a shopping intelligence product.
+## Status do Projeto
 
-> Current status: technical foundation and early MVP. The project is not yet production-ready.
+O projeto está em fase de fundação técnica e MVP inicial. A base atual ainda não deve ser considerada pronta para produção.
 
----
+Recursos implementados:
 
-## Overview
+- Monorepo TypeScript com `pnpm workspaces`.
+- Backend NestJS com adaptador Fastify em `apps/api`.
+- Contratos compartilhados com Zod em `packages/contracts`.
+- Regras de domínio isoladas em `packages/core`.
+- Schema PostgreSQL e migrations com Drizzle em `packages/db`.
+- Health check da API.
+- Cadastro, login e endpoint autenticado `GET /auth/me`.
+- Hash de senha com Argon2id.
+- Access token JWT HS256 com segredo obrigatório em produção.
+- RBAC simples para `user`, `admin` e `owner`.
+- CRUD administrativo de categorias, marcas, produtos, variações, lojas e ofertas.
+- Registro manual de snapshots de preço.
+- Auditoria administrativa transacional com antes/depois, contexto da requisição e filtros por entidade.
+- Headers HTTP defensivos e rate limit global configurável.
+- Testes unitários, contratos compartilhados e testes e2e com PostgreSQL real.
+- CI com lint, typecheck, testes, build e smoke test da API compilada.
 
-Modern consumers often compare prices across multiple stores without knowing whether an offer is actually good, whether the store is reliable, or whether the price is historically meaningful.
+Pendências antes de produção:
 
-DealTrust explores this problem by building the backend foundation for a platform that can:
+- Verificação de e-mail.
+- Refresh token, rotação e revogação de sessão.
+- Rate limit distribuído com Valkey para múltiplas instâncias.
+- Política granular de rate limit para autenticação e endpoints públicos sensíveis.
+- OpenAPI publicado.
+- Logs estruturados, correlation id e observabilidade.
 
-- Organize products, brands, categories, stores, offers, and price snapshots.
-- Track price history over time.
-- Identify suspicious discounts and possible opportunities.
-- Support user alerts for target prices and price drops.
-- Provide administrative workflows for catalog quality.
-- Keep business rules isolated, testable, and reusable.
+## Stack Técnica
 
-The current implementation focuses on the core backend foundation: authentication, authorization, catalog administration, shared contracts, database schema, automated tests, and CI validation.
-
----
-
-## Why This Project Exists
-
-This project was created to practice and demonstrate production-oriented backend engineering through a real product idea instead of isolated code exercises.
-
-The main engineering goals are:
-
-- Build a maintainable TypeScript monorepo.
-- Separate API, domain rules, contracts, and persistence.
-- Use explicit validation at system boundaries.
-- Apply authentication and authorization from the beginning.
-- Validate behavior with automated tests and real database integration.
-- Keep the architecture ready for future services such as workers, queues, notifications, and price snapshot ingestion.
-
----
-
-## Tech Stack
-
-| Area | Technology |
-|---|---|
-| Language | TypeScript |
-| Runtime | Node.js |
-| Package manager | pnpm workspaces |
+| Camada | Escolha |
+| --- | --- |
+| Linguagem | TypeScript em modo estrito |
+| Runtime | Node.js 24 LTS |
+| Monorepo | pnpm workspaces |
 | Backend | NestJS + Fastify |
-| Validation | Zod |
-| Database | PostgreSQL |
-| ORM / Migrations | Drizzle ORM |
-| Authentication | Argon2id password hashing + JWT |
-| Authorization | Role-based access control |
-| Testing | Vitest + e2e tests with real PostgreSQL |
-| Quality | Biome, TypeScript strict mode, GitHub Actions |
-| Local infrastructure | Docker Compose |
+| Validação | Zod |
+| Banco transacional | PostgreSQL |
+| ORM e migrations | Drizzle ORM |
+| Cache e filas planejadas | Valkey + BullMQ |
+| Testes | Vitest + testes e2e com PostgreSQL real |
+| Qualidade | Biome, TypeScript e GitHub Actions |
 
----
+## Estrutura
 
-## Repository Structure
-
-```txt
+```text
 apps/
-  api/             # NestJS/Fastify API
-
+  api/          API NestJS/Fastify
 packages/
-  core/            # Pure domain rules and business logic
-  contracts/       # Zod schemas, DTOs and shared types
-  db/              # Drizzle schema, migrations and database access
-
+  core/         Regras de domínio puras e testáveis
+  contracts/    Schemas, DTOs e tipos compartilhados
+  db/           Schema, migrations e acesso ao PostgreSQL
 docs/
-  adr/             # Architecture decision records
+  adr/          Decisões arquiteturais
 ```
 
-This structure keeps the API from becoming a large monolithic layer. Domain logic, validation contracts, and database access are separated so they can evolve independently.
-
----
-
-## Implemented Features
-
-### Foundation
-
-- TypeScript monorepo with pnpm workspaces.
-- Backend API using NestJS with Fastify adapter.
-- Shared contracts with Zod.
-- Isolated domain rules in a dedicated core package.
-- PostgreSQL schema and migrations with Drizzle ORM.
-- Health check endpoint.
-- GitHub Actions validation pipeline.
-
-### Authentication and Authorization
-
-- User registration.
-- Login with e-mail and password.
-- Authenticated `GET /auth/me` endpoint.
-- Password hashing with Argon2id.
-- JWT access tokens.
-- Role-based access control with:
-  - `user`
-  - `admin`
-  - `owner`
-
-### Catalog Administration
-
-Initial administrative CRUD for:
-
-- Categories.
-- Brands.
-- Products.
-
-Administrative endpoints require a valid token and an authorized role.
-
-### Testing and Validation
-
-- Unit tests for domain rules.
-- Contract tests for shared schemas.
-- e2e tests using a real PostgreSQL database.
-- Validation for invalid payloads, missing tokens, invalid credentials and insufficient permissions.
-- CI pipeline with lint, typecheck, tests, build and compiled API smoke test.
-
----
-
-## API Surface
-
-Current endpoints include:
-
-```txt
-GET    /health
-
-POST   /auth/register
-POST   /auth/login
-GET    /auth/me
-
-GET    /admin/categories
-POST   /admin/categories
-GET    /admin/categories/:id
-PATCH  /admin/categories/:id
-DELETE /admin/categories/:id
-
-GET    /admin/brands
-POST   /admin/brands
-GET    /admin/brands/:id
-PATCH  /admin/brands/:id
-DELETE /admin/brands/:id
-
-GET    /admin/products
-POST   /admin/products
-GET    /admin/products/:id
-PATCH  /admin/products/:id
-DELETE /admin/products/:id
-```
-
----
-
-## Example Authentication Payload
-
-### Register
-
-```json
-{
-  "name": "Example User",
-  "email": "user@example.com",
-  "password": "StrongExamplePassword123!"
-}
-```
-
-### Authentication Response
-
-```json
-{
-  "accessToken": "<jwt>",
-  "tokenType": "Bearer",
-  "expiresInSeconds": 900,
-  "user": {
-    "id": "<uuid>",
-    "name": "Example User",
-    "email": "user@example.com",
-    "role": "user"
-  }
-}
-```
-
----
-
-## Local Requirements
+## Requisitos Locais
 
 - Node.js `>=24 <25`
 - pnpm `>=11 <12`
 - Git
-- Docker Desktop or Docker Engine
+- Docker Desktop ou Docker Engine
 
----
+## Configuração
 
-## Environment Setup
+Instale as dependências:
 
-Install dependencies:
-
-```bash
+```powershell
 pnpm install
 ```
 
-Create a local environment file from `.env.example` and adjust the values for your machine.
+Crie o arquivo local de ambiente a partir de `.env.example` e ajuste os segredos conforme o ambiente.
 
-Main environment variables:
+Variáveis principais:
 
 ```env
 DATABASE_URL=postgres://dealtrust:dealtrust@localhost:5432/dealtrust
@@ -212,176 +88,207 @@ DATABASE_MAX_CONNECTIONS=10
 VALKEY_URL=redis://localhost:6379
 AUTH_JWT_SECRET=change-me-to-a-random-secret-with-at-least-32-chars
 AUTH_ACCESS_TOKEN_TTL_SECONDS=900
+API_BODY_LIMIT_BYTES=1048576
+API_RATE_LIMIT_WINDOW_SECONDS=60
+API_RATE_LIMIT_MAX_REQUESTS=300
+API_CORS_ORIGINS=
 ```
 
-In production, `AUTH_JWT_SECRET` must be a random secret with at least 32 characters.
+Em `production`, `AUTH_JWT_SECRET` é obrigatório e deve ser um segredo aleatório com pelo menos 32 caracteres.
 
----
+## Ambiente Local
 
-## Running Locally
+Suba os serviços de desenvolvimento:
 
-Start local services:
-
-```bash
+```powershell
 docker compose up -d postgres postgres-test valkey mailpit
 ```
 
-Default local ports:
+Portas padrão:
 
-| Service | Port |
-|---|---:|
-| API | `3001` |
-| PostgreSQL development | `5432` |
-| PostgreSQL test | `5433` |
-| Valkey | `6379` |
-| Mailpit SMTP | `1025` |
-| Mailpit UI | `8025` |
+- API: `3001`
+- PostgreSQL de desenvolvimento: `5432`
+- PostgreSQL de teste: `5433`
+- Valkey: `6379`
+- Mailpit SMTP: `1025`
+- Mailpit UI: `8025`
 
-Run the API in development mode:
+## Comandos
 
-```bash
-pnpm --filter @dealtrust/api dev
-```
+Validação completa com PostgreSQL real:
 
----
-
-## Quality Commands
-
-Run tests without requiring an external database:
-
-```bash
-pnpm test:run
-```
-
-Run full validation with real PostgreSQL:
-
-```bash
+```powershell
+$env:TEST_DATABASE_URL='postgres://dealtrust:dealtrust@localhost:5433/dealtrust_test'
 pnpm verify
 ```
 
-Run API tests with real PostgreSQL:
+Testes sem banco externo obrigatório:
 
-```bash
+```powershell
+pnpm test:run
+```
+
+Sem `TEST_DATABASE_URL`, os testes de integração que dependem de banco são pulados de forma explícita.
+
+Testes apenas da API com PostgreSQL real:
+
+```powershell
+$env:TEST_DATABASE_URL='postgres://dealtrust:dealtrust@localhost:5433/dealtrust_test'
 pnpm --filter @dealtrust/api test:run
 ```
 
-Check database migrations:
+Checar migrations:
 
-```bash
+```powershell
 pnpm --filter @dealtrust/db db:check
 ```
 
-Build all packages:
+Build:
 
-```bash
+```powershell
 pnpm build
 ```
 
----
+API em desenvolvimento:
 
-## Engineering Principles
+```powershell
+pnpm --filter @dealtrust/api dev
+```
 
-DealTrust follows a few strict engineering principles:
+## API Atual
 
-- Fail explicitly when contracts, database access, tests or builds are incorrect.
-- Keep domain rules pure whenever possible.
-- Validate input at boundaries.
-- Avoid hiding errors during CI.
-- Prefer small packages with clear responsibilities.
-- Treat authentication, authorization and data integrity as core requirements, not later additions.
-- Keep the project honest about its current status.
+Endpoints disponíveis:
 
----
+- `GET /health`
+- `POST /auth/register`
+- `POST /auth/login`
+- `GET /auth/me`
+- `GET /admin/categories`
+- `POST /admin/categories`
+- `GET /admin/categories/:id`
+- `PATCH /admin/categories/:id`
+- `DELETE /admin/categories/:id`
+- `GET /admin/brands`
+- `POST /admin/brands`
+- `GET /admin/brands/:id`
+- `PATCH /admin/brands/:id`
+- `DELETE /admin/brands/:id`
+- `GET /admin/products`
+- `POST /admin/products`
+- `GET /admin/products/:id`
+- `PATCH /admin/products/:id`
+- `DELETE /admin/products/:id`
+- `GET /admin/product-variants`
+- `POST /admin/product-variants`
+- `GET /admin/product-variants/:id`
+- `PATCH /admin/product-variants/:id`
+- `DELETE /admin/product-variants/:id`
+- `GET /admin/stores`
+- `POST /admin/stores`
+- `GET /admin/stores/:id`
+- `PATCH /admin/stores/:id`
+- `DELETE /admin/stores/:id`
+- `GET /admin/offers`
+- `POST /admin/offers`
+- `GET /admin/offers/:id`
+- `PATCH /admin/offers/:id`
+- `DELETE /admin/offers/:id`
+- `GET /admin/price-snapshots`
+- `POST /admin/price-snapshots`
+- `GET /admin/price-snapshots/:id`
+- `GET /admin/audit-logs`
 
-## Roadmap
+Exemplo de cadastro:
 
-### Milestone 0 — Foundation
+```json
+{
+  "name": "Usuário Exemplo",
+  "email": "usuario@example.com",
+  "password": "SenhaExemploSegura123!"
+}
+```
 
-- Repository structure.
-- Monorepo setup.
-- Docker Compose.
-- CI pipeline.
-- Base documentation.
-- Database schema.
-- Initial automated tests.
+Resposta de autenticação:
 
-Status: implemented.
+```json
+{
+  "accessToken": "<jwt>",
+  "tokenType": "Bearer",
+  "expiresInSeconds": 900,
+  "user": {
+    "id": "<uuid>",
+    "name": "Usuário Exemplo",
+    "email": "usuario@example.com",
+    "role": "user"
+  }
+}
+```
 
-### Milestone 1 — Backend Base and Admin
+Observações operacionais:
 
-- E-mail/password authentication.
-- Simple RBAC.
-- Category CRUD.
-- Brand CRUD.
-- Product CRUD.
-- Product variation CRUD.
-- Store CRUD.
-- Offer CRUD.
-- Manual price snapshot registration.
-- Basic administrative audit log.
+- `DELETE /admin/categories/:id`, `DELETE /admin/products/:id`, `DELETE /admin/product-variants/:id` e `DELETE /admin/stores/:id` arquivam o registro.
+- `DELETE /admin/brands/:id` remove a marca quando ela não está vinculada a produtos.
+- `DELETE /admin/offers/:id` marca a oferta como expirada, preservando o histórico.
+- Endpoints administrativos exigem token válido e role `admin` ou `owner`.
+- `GET /admin/audit-logs` exige role `owner`.
+- A auditoria administrativa registra antes/depois, campos alterados, ator, entidade e contexto HTTP sem armazenar segredos.
+- O rate limit atual é uma proteção local por instância; a versão distribuída com Valkey permanece como requisito antes de produção.
 
-Status: partially implemented.
+## Qualidade e Validação
 
-### Milestone 2 — Product and Price History
+O projeto deve falhar de forma explícita quando contrato, banco, build ou teste estiver incorreto. Erros não devem ser mascarados durante desenvolvimento ou CI.
 
-- Product search.
-- Product detail page data model.
-- Current price by store.
-- Historical price charts for 7, 30, 90 and 180 days.
-- Historical price indicators.
-- Store reliability signals.
-- Opportunity detection.
+Cobertura atual de validação:
 
-Status: planned.
+- Contratos Zod de autenticação, catálogo, ofertas, alertas, busca e dinheiro.
+- Regras de domínio de preço, desconto inconsistente e oportunidade.
+- Schema Drizzle e migrations aplicadas em PostgreSQL real.
+- Health check e autenticação pela pilha real Nest/Fastify.
+- Respostas HTTP esperadas para payload inválido, token ausente, credencial inválida e permissão insuficiente.
+- CRUD administrativo de categorias, marcas, produtos, variações, lojas, ofertas e snapshots validado com PostgreSQL real.
+- Auditoria administrativa validada em fluxo e2e com consulta por entidade.
+- Headers defensivos e rate limit global validados pela pilha real Nest/Fastify.
+- Hash de senha validado com Argon2id.
+- JWT validado com issuer, audience, subject e claims.
 
-### Milestone 3 — Alerts and Automation
+## Roadmap do MVP
 
-- Favorites and product lists.
-- Target price alerts.
-- Percentage drop alerts.
-- Background worker for offer checks.
-- E-mail notifications.
+Marco 0 - Fundação:
 
-Status: planned.
+- Repositório, monorepo, Docker Compose, CI, documentação, schema e testes base. Implementado.
 
----
+Marco 1 - Backend base e administração inicial:
 
-## Before Production
+- Auth com e-mail e senha. Base implementada.
+- RBAC simples: `user`, `admin`, `owner`. Base implementada.
+- CRUD de categorias. Base implementada.
+- CRUD de marcas. Base implementada.
+- CRUD de produtos. Base implementada.
+- CRUD de variações e lojas. Base implementada.
+- CRUD de ofertas. Base implementada.
+- Registro manual de snapshots de preço. Base implementada.
+- Auditoria administrativa completa e transacional. Base implementada.
+- Headers defensivos e rate limit global. Base implementada.
 
-The following items are intentionally pending before any production use:
+Marco 2 - Produto público e histórico:
 
-- E-mail verification.
-- Refresh tokens.
-- Session rotation and revocation.
-- Rate limiting for authentication and sensitive public endpoints.
-- Administrative audit trail.
-- OpenAPI documentation.
-- Structured logs.
-- Correlation IDs.
-- Observability.
-- Security review.
-- Deployment hardening.
+- Busca de produtos.
+- Página de produto com preço atual, lojas e histórico.
+- Gráficos de 7, 30, 90 e 180 dias.
+- Indicadores de preço histórico, oportunidade, disponibilidade e confiabilidade da loja.
 
----
+Marco 3 - Alertas e recorrência:
 
-## What This Project Demonstrates
+- Favoritos e listas.
+- Alertas por preço alvo e queda percentual.
+- Worker de verificação.
+- Notificação por e-mail.
 
-This repository demonstrates:
+## Documentos Base
 
-- Backend API design with TypeScript.
-- Modular monorepo organization.
-- Authentication and authorization fundamentals.
-- Database modeling with PostgreSQL and Drizzle.
-- Shared contracts with Zod.
-- Automated testing discipline.
-- Real database e2e testing.
-- CI validation.
-- Product-oriented backend architecture.
-
----
-
-## Author
-
-Ailton Santana Reis
-
-Software Engineering student focused on backend engineering, product architecture, data-driven applications and reliable software systems.
+- [Visão do Produto](docs/00-visao-produto.md)
+- [Stack e Arquitetura](docs/01-stack-arquitetura.md)
+- [Roadmap do MVP](docs/02-roadmap-mvp.md)
+- [Modelo de Dados Inicial](docs/03-modelo-dados-inicial.md)
+- [Práticas de Engenharia](docs/04-praticas-engenharia.md)
+- [ADR 0001 - Stack Inicial](docs/adr/0001-stack-inicial.md)

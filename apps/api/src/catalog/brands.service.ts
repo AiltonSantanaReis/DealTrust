@@ -14,6 +14,7 @@ import {
   NotFoundException
 } from "@nestjs/common";
 import { asc, eq, ilike } from "drizzle-orm";
+import { type AdminActionContext, AdminAuditService } from "../audit/admin-audit.service.js";
 import { DatabaseService } from "../database/database.service.js";
 import { isForeignKeyViolation, isUniqueViolation } from "../database/postgres-errors.js";
 import { mapBrand } from "./brand-mapper.js";
@@ -27,21 +28,36 @@ type BrandUpdateValues = {
 
 @Injectable()
 export class BrandsService {
-  constructor(@Inject(DatabaseService) private readonly database: DatabaseService) {}
+  constructor(
+    @Inject(DatabaseService) private readonly database: DatabaseService,
+    @Inject(AdminAuditService) private readonly adminAuditService: AdminAuditService
+  ) {}
 
-  async create(input: CreateBrandRequest): Promise<BrandResponse> {
+  async create(input: CreateBrandRequest, context: AdminActionContext): Promise<BrandResponse> {
     try {
-      const slug = input.slug ?? createSlug(input.name);
+      return await this.database.db.transaction(async (tx) => {
+        const slug = input.slug ?? createSlug(input.name);
 
-      const [brand] = await this.database.db
-        .insert(brands)
-        .values({
-          name: input.name,
-          slug
-        })
-        .returning();
+        const [brand] = await tx
+          .insert(brands)
+          .values({
+            name: input.name,
+            slug
+          })
+          .returning();
 
-      return mapBrand(requireBrand(brand));
+        const response = mapBrand(requireBrand(brand));
+        await this.adminAuditService.recordWithExecutor(tx, {
+          actor: context.actor,
+          action: "create",
+          entityType: "brand",
+          entityId: response.id,
+          request: context.request,
+          after: response
+        });
+
+        return response;
+      });
     } catch (error) {
       throw mapWriteError(error);
     }
@@ -64,7 +80,11 @@ export class BrandsService {
     return mapBrand(await this.getBrandRowById(id));
   }
 
-  async update(id: string, input: UpdateBrandRequest): Promise<BrandResponse> {
+  async update(
+    id: string,
+    input: UpdateBrandRequest,
+    context: AdminActionContext
+  ): Promise<BrandResponse> {
     const values: BrandUpdateValues = {
       updatedAt: new Date()
     };
@@ -78,28 +98,51 @@ export class BrandsService {
     }
 
     try {
-      const [brand] = await this.database.db
-        .update(brands)
-        .set(values)
-        .where(eq(brands.id, id))
-        .returning();
+      return await this.database.db.transaction(async (tx) => {
+        const beforeRows = await tx.select().from(brands).where(eq(brands.id, id)).limit(1);
+        const before = mapBrand(requireFoundBrand(beforeRows.at(0)));
+        const [brand] = await tx.update(brands).set(values).where(eq(brands.id, id)).returning();
 
-      return mapBrand(requireFoundBrand(brand));
+        const response = mapBrand(requireFoundBrand(brand));
+        await this.adminAuditService.recordWithExecutor(tx, {
+          actor: context.actor,
+          action: "update",
+          entityType: "brand",
+          entityId: response.id,
+          request: context.request,
+          before,
+          after: response
+        });
+
+        return response;
+      });
     } catch (error) {
       throw mapWriteError(error);
     }
   }
 
-  async delete(id: string): Promise<void> {
+  async delete(id: string, context: AdminActionContext): Promise<void> {
     try {
-      const [brand] = await this.database.db
-        .delete(brands)
-        .where(eq(brands.id, id))
-        .returning({ id: brands.id });
+      await this.database.db.transaction(async (tx) => {
+        const beforeRows = await tx.select().from(brands).where(eq(brands.id, id)).limit(1);
+        const before = mapBrand(requireFoundBrand(beforeRows.at(0)));
+        const [brand] = await tx.delete(brands).where(eq(brands.id, id)).returning({
+          id: brands.id
+        });
 
-      if (!brand) {
-        throw new NotFoundException("Brand not found.");
-      }
+        if (!brand) {
+          throw new NotFoundException("Brand not found.");
+        }
+
+        await this.adminAuditService.recordWithExecutor(tx, {
+          actor: context.actor,
+          action: "delete",
+          entityType: "brand",
+          entityId: before.id,
+          request: context.request,
+          before
+        });
+      });
     } catch (error) {
       if (isForeignKeyViolation(error)) {
         throw new ConflictException("Brand is in use.");

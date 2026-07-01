@@ -14,7 +14,11 @@ const config: ApiConfig = {
   databaseMaxConnections: 2,
   valkeyUrl: "redis://localhost:6379",
   authJwtSecret,
-  authAccessTokenTtlSeconds: 900
+  authAccessTokenTtlSeconds: 900,
+  apiBodyLimitBytes: 1_048_576,
+  apiRateLimitWindowSeconds: 60,
+  apiRateLimitMaxRequests: 300,
+  apiCorsOrigins: []
 };
 
 const user: AuthUser = {

@@ -1,6 +1,7 @@
 import {
   type AdminProductListResponse,
   type AdminProductResponse,
+  type AuthUser,
   adminProductListQuerySchema,
   adminProductListResponseSchema,
   adminProductResponseSchema,
@@ -18,8 +19,12 @@ import {
   Param,
   Patch,
   Post,
-  Query
+  Query,
+  Req
 } from "@nestjs/common";
+import { createAuditRequestContext } from "../audit/audit-request-context.js";
+import type { AuthenticatedRequest } from "../auth/authenticated-request.js";
+import { CurrentUser } from "../auth/current-user.decorator.js";
 import { RequireRoles } from "../auth/require-roles.decorator.js";
 import { parseRequestBody, parseRequestQuery, parseRouteParam } from "../shared/validation.js";
 import { ProductsService } from "./products.service.js";
@@ -30,9 +35,16 @@ export class AdminProductsController {
   constructor(@Inject(ProductsService) private readonly productsService: ProductsService) {}
 
   @Post()
-  async create(@Body() body: unknown): Promise<AdminProductResponse> {
-    const request = parseRequestBody(createAdminProductRequestSchema, body);
-    const product = await this.productsService.create(request);
+  async create(
+    @Body() body: unknown,
+    @CurrentUser() user: AuthUser,
+    @Req() request: AuthenticatedRequest
+  ): Promise<AdminProductResponse> {
+    const parsedBody = parseRequestBody(createAdminProductRequestSchema, body);
+    const product = await this.productsService.create(parsedBody, {
+      actor: user,
+      request: createAuditRequestContext(request)
+    });
 
     return adminProductResponseSchema.parse(product);
   }
@@ -54,19 +66,34 @@ export class AdminProductsController {
   }
 
   @Patch(":id")
-  async update(@Param("id") id: unknown, @Body() body: unknown): Promise<AdminProductResponse> {
+  async update(
+    @Param("id") id: unknown,
+    @Body() body: unknown,
+    @CurrentUser() user: AuthUser,
+    @Req() request: AuthenticatedRequest
+  ): Promise<AdminProductResponse> {
     const productId = parseRouteParam(publicIdSchema, id);
-    const request = parseRequestBody(updateAdminProductRequestSchema, body);
-    const product = await this.productsService.update(productId, request);
+    const parsedBody = parseRequestBody(updateAdminProductRequestSchema, body);
+    const product = await this.productsService.update(productId, parsedBody, {
+      actor: user,
+      request: createAuditRequestContext(request)
+    });
 
     return adminProductResponseSchema.parse(product);
   }
 
   @Delete(":id")
   @HttpCode(204)
-  async archive(@Param("id") id: unknown): Promise<void> {
+  async archive(
+    @Param("id") id: unknown,
+    @CurrentUser() user: AuthUser,
+    @Req() request: AuthenticatedRequest
+  ): Promise<void> {
     const productId = parseRouteParam(publicIdSchema, id);
 
-    await this.productsService.archive(productId);
+    await this.productsService.archive(productId, {
+      actor: user,
+      request: createAuditRequestContext(request)
+    });
   }
 }

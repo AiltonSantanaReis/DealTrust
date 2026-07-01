@@ -1,4 +1,5 @@
 import {
+  type AuthUser,
   type BrandListResponse,
   type BrandResponse,
   brandListQuerySchema,
@@ -18,8 +19,12 @@ import {
   Param,
   Patch,
   Post,
-  Query
+  Query,
+  Req
 } from "@nestjs/common";
+import { createAuditRequestContext } from "../audit/audit-request-context.js";
+import type { AuthenticatedRequest } from "../auth/authenticated-request.js";
+import { CurrentUser } from "../auth/current-user.decorator.js";
 import { RequireRoles } from "../auth/require-roles.decorator.js";
 import { parseRequestBody, parseRequestQuery, parseRouteParam } from "../shared/validation.js";
 import { BrandsService } from "./brands.service.js";
@@ -30,9 +35,16 @@ export class AdminBrandsController {
   constructor(@Inject(BrandsService) private readonly brandsService: BrandsService) {}
 
   @Post()
-  async create(@Body() body: unknown): Promise<BrandResponse> {
-    const request = parseRequestBody(createBrandRequestSchema, body);
-    const brand = await this.brandsService.create(request);
+  async create(
+    @Body() body: unknown,
+    @CurrentUser() user: AuthUser,
+    @Req() request: AuthenticatedRequest
+  ): Promise<BrandResponse> {
+    const parsedBody = parseRequestBody(createBrandRequestSchema, body);
+    const brand = await this.brandsService.create(parsedBody, {
+      actor: user,
+      request: createAuditRequestContext(request)
+    });
 
     return brandResponseSchema.parse(brand);
   }
@@ -54,19 +66,34 @@ export class AdminBrandsController {
   }
 
   @Patch(":id")
-  async update(@Param("id") id: unknown, @Body() body: unknown): Promise<BrandResponse> {
+  async update(
+    @Param("id") id: unknown,
+    @Body() body: unknown,
+    @CurrentUser() user: AuthUser,
+    @Req() request: AuthenticatedRequest
+  ): Promise<BrandResponse> {
     const brandId = parseRouteParam(publicIdSchema, id);
-    const request = parseRequestBody(updateBrandRequestSchema, body);
-    const brand = await this.brandsService.update(brandId, request);
+    const parsedBody = parseRequestBody(updateBrandRequestSchema, body);
+    const brand = await this.brandsService.update(brandId, parsedBody, {
+      actor: user,
+      request: createAuditRequestContext(request)
+    });
 
     return brandResponseSchema.parse(brand);
   }
 
   @Delete(":id")
   @HttpCode(204)
-  async delete(@Param("id") id: unknown): Promise<void> {
+  async delete(
+    @Param("id") id: unknown,
+    @CurrentUser() user: AuthUser,
+    @Req() request: AuthenticatedRequest
+  ): Promise<void> {
     const brandId = parseRouteParam(publicIdSchema, id);
 
-    await this.brandsService.delete(brandId);
+    await this.brandsService.delete(brandId, {
+      actor: user,
+      request: createAuditRequestContext(request)
+    });
   }
 }

@@ -1,56 +1,56 @@
-# Visao do Produto
+# Visão do Produto
 
 ## Objetivo
 
-DealTrust deve ser uma central de decisao de compra. O produto ajuda o usuario a saber se uma oferta e real, se a loja e confiavel e se vale comprar agora ou esperar.
+DealTrust deve ser uma central de decisão de compra. O produto ajuda o usuário a avaliar se uma oferta é consistente, se a loja é confiável e se vale comprar agora ou esperar.
 
 ## Problemas que o produto resolve
 
-- Promocoes falsas baseadas em preco de referencia artificial.
-- Dificuldade de comparar preco final com frete, cupom e cashback confirmado.
-- Falta de historico confiavel para decidir o melhor momento de compra.
+- Promoções baseadas em preço de referência artificial ou inconsistente.
+- Dificuldade de comparar preço final com frete, cupom e cashback confirmado.
+- Falta de histórico confiável para decidir o melhor momento de compra.
 - Risco de compra em loja com sinais de baixa confiabilidade.
 - Dificuldade de monitorar produtos de alto valor ao longo do tempo.
 
-## Publico inicial
+## Público inicial
 
-- Compradores economicos que monitoram menor preco.
-- Gamers acompanhando consoles, jogos, placas, perifericos e assinaturas.
-- Familias comprando eletrodomesticos e itens de maior valor.
-- Usuarios que buscam reduzir risco de fraude e ofertas potencialmente enganosas.
-- Usuarios recorrentes que querem um radar diario de oportunidades reais.
+- Compradores que monitoram menor preço.
+- Gamers acompanhando consoles, jogos, placas, periféricos e assinaturas.
+- Famílias comprando eletrodomésticos e itens de maior valor.
+- Usuários que buscam reduzir risco em compras digitais e ofertas de baixa confiabilidade.
+- Usuários recorrentes que querem um radar diário de oportunidades verificáveis.
 
 ## Escopo do MVP
 
-Incluido:
+Incluído:
 
-- Cadastro, login e perfil basico.
-- Catalogo de produtos, categorias, marcas e variacoes.
+- Cadastro, login e perfil básico.
+- Catálogo de produtos, categorias, marcas e variações.
 - Cadastro de lojas e URLs de compra.
-- Historico de precos com grafico.
-- Alertas de preco.
+- Histórico de preços com gráfico.
+- Alertas de preço.
 - Favoritos e listas simples.
-- Ranking de ofertas reais.
-- Notificacao por e-mail e push.
+- Ranking de ofertas verificáveis.
+- Notificação por e-mail e push.
 - Painel administrativo para revisar produtos, lojas, ofertas e falhas.
 
 Fora do MVP inicial:
 
 - Compra direta dentro do app.
-- Marketplace proprio.
-- Cashback proprio.
+- Marketplace próprio.
+- Cashback próprio.
 - Sistema completo de afiliados.
 - WhatsApp/Telegram.
-- IA generativa complexa para recomendacao.
+- IA generativa complexa para recomendação.
 
 ## Categorias iniciais
 
-Comecar por categorias com alto valor percebido e historico facil de explicar:
+Começar por categorias com alto valor percebido e histórico fácil de explicar:
 
 1. Games.
-2. Eletronicos.
-3. Eletrodomesticos.
+2. Eletrônicos.
+3. Eletrodomésticos.
 
 ## Regra de produto
 
-Se uma funcionalidade nao ajuda o usuario a confiar no preco, confiar na loja ou agir no momento certo, ela nao entra no primeiro ciclo.
+Se uma funcionalidade não ajuda o usuário a confiar no preço, confiar na loja ou agir no momento certo, ela não entra no primeiro ciclo.

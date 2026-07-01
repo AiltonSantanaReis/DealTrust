@@ -1,6 +1,6 @@
 # apps/api
 
-Backend NestJS planejado para os dominios:
+Backend NestJS planejado para os domínios:
 
 - auth
 - users
@@ -13,7 +13,7 @@ Backend NestJS planejado para os dominios:
 - admin
 - analytics
 
-Primeiro objetivo: API REST com OpenAPI, autenticacao, CRUD administrativo e regras de historico de preco.
+Primeiro objetivo: API REST com OpenAPI, autenticação, CRUD administrativo, auditoria completa e regras de histórico de preço.
 
 Comandos iniciais:
 
@@ -24,6 +24,17 @@ pnpm --filter @dealtrust/api typecheck
 pnpm --filter @dealtrust/api build
 ```
 
-Endpoint inicial:
+Principais endpoints atuais:
 
 - `GET /health`
+- `POST /auth/register`
+- `POST /auth/login`
+- `GET /auth/me`
+- `GET|POST|PATCH|DELETE /admin/categories`
+- `GET|POST|PATCH|DELETE /admin/brands`
+- `GET|POST|PATCH|DELETE /admin/products`
+- `GET|POST|PATCH|DELETE /admin/product-variants`
+- `GET|POST|PATCH|DELETE /admin/stores`
+- `GET|POST|PATCH|DELETE /admin/offers`
+- `GET|POST /admin/price-snapshots`
+- `GET /admin/audit-logs`

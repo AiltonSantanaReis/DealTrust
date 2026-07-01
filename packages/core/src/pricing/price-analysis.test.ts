@@ -4,7 +4,7 @@ import {
   analyzePriceOpportunity,
   calculateAveragePrice,
   calculateHistoricalLow,
-  detectSuspiciousDiscount,
+  detectInconsistentDiscount,
   type PriceSnapshot
 } from "./price-analysis.js";
 
@@ -85,27 +85,27 @@ describe("price analysis", () => {
     expect(analysis.discountFromAveragePercent).toBe(-14.29);
   });
 
-  it("detects suspicious discount after recent artificial increase", () => {
+  it("detects inconsistent discount after recent artificial increase", () => {
     const snapshots = [
       snapshot(100_00, "2026-06-17"),
       snapshot(130_00, "2026-06-25"),
       snapshot(128_00, "2026-06-28")
     ];
 
-    expect(detectSuspiciousDiscount(createMoney(99_00), snapshots, now)).toBe(true);
+    expect(detectInconsistentDiscount(createMoney(99_00), snapshots, now)).toBe(true);
 
     const analysis = analyzePriceOpportunity(createMoney(99_00), snapshots, now);
-    expect(analysis.label).toBe("suspicious_discount");
+    expect(analysis.label).toBe("inconsistent_discount");
   });
 
-  it("does not detect suspicious discount with old increase outside lookback", () => {
+  it("does not detect inconsistent discount with old increase outside lookback", () => {
     const snapshots = [
       snapshot(100_00, "2026-05-01"),
       snapshot(130_00, "2026-05-10"),
       snapshot(99_00, "2026-06-29")
     ];
 
-    expect(detectSuspiciousDiscount(createMoney(98_00), snapshots, now)).toBe(false);
+    expect(detectInconsistentDiscount(createMoney(98_00), snapshots, now)).toBe(false);
   });
 });
 

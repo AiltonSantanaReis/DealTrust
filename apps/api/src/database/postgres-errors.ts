@@ -6,6 +6,10 @@ export function isForeignKeyViolation(error: unknown): boolean {
   return hasPostgresErrorCode(error, "23503");
 }
 
+export function isCheckViolation(error: unknown): boolean {
+  return hasPostgresErrorCode(error, "23514");
+}
+
 function hasPostgresErrorCode(error: unknown, code: string, depth = 0): boolean {
   if (depth > 3 || typeof error !== "object" || error === null) {
     return false;

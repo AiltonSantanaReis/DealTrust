@@ -15,6 +15,7 @@ import {
   NotFoundException
 } from "@nestjs/common";
 import { and, asc, eq, ilike } from "drizzle-orm";
+import { type AdminActionContext, AdminAuditService } from "../audit/admin-audit.service.js";
 import { DatabaseService } from "../database/database.service.js";
 import { isForeignKeyViolation, isUniqueViolation } from "../database/postgres-errors.js";
 import { mapCategory } from "./category-mapper.js";
@@ -30,23 +31,41 @@ type CategoryUpdateValues = {
 
 @Injectable()
 export class CategoriesService {
-  constructor(@Inject(DatabaseService) private readonly database: DatabaseService) {}
+  constructor(
+    @Inject(DatabaseService) private readonly database: DatabaseService,
+    @Inject(AdminAuditService) private readonly adminAuditService: AdminAuditService
+  ) {}
 
-  async create(input: CreateCategoryRequest): Promise<CategoryResponse> {
+  async create(
+    input: CreateCategoryRequest,
+    context: AdminActionContext
+  ): Promise<CategoryResponse> {
     try {
-      const slug = input.slug ?? createSlug(input.name);
+      return await this.database.db.transaction(async (tx) => {
+        const slug = input.slug ?? createSlug(input.name);
 
-      const [category] = await this.database.db
-        .insert(categories)
-        .values({
-          name: input.name,
-          slug,
-          parentId: input.parentId,
-          status: input.status
-        })
-        .returning();
+        const [category] = await tx
+          .insert(categories)
+          .values({
+            name: input.name,
+            slug,
+            parentId: input.parentId,
+            status: input.status
+          })
+          .returning();
 
-      return mapCategory(requireCategory(category));
+        const response = mapCategory(requireCategory(category));
+        await this.adminAuditService.recordWithExecutor(tx, {
+          actor: context.actor,
+          action: "create",
+          entityType: "category",
+          entityId: response.id,
+          request: context.request,
+          after: response
+        });
+
+        return response;
+      });
     } catch (error) {
       throw mapWriteError(error);
     }
@@ -74,7 +93,11 @@ export class CategoriesService {
     return mapCategory(await this.getCategoryRowById(id));
   }
 
-  async update(id: string, input: UpdateCategoryRequest): Promise<CategoryResponse> {
+  async update(
+    id: string,
+    input: UpdateCategoryRequest,
+    context: AdminActionContext
+  ): Promise<CategoryResponse> {
     const values: CategoryUpdateValues = {
       updatedAt: new Date()
     };
@@ -96,31 +119,57 @@ export class CategoriesService {
     }
 
     try {
-      const [category] = await this.database.db
-        .update(categories)
-        .set(values)
-        .where(eq(categories.id, id))
-        .returning();
+      return await this.database.db.transaction(async (tx) => {
+        const beforeRows = await tx.select().from(categories).where(eq(categories.id, id)).limit(1);
+        const before = mapCategory(requireFoundCategory(beforeRows.at(0)));
+        const [category] = await tx
+          .update(categories)
+          .set(values)
+          .where(eq(categories.id, id))
+          .returning();
 
-      return mapCategory(requireFoundCategory(category));
+        const response = mapCategory(requireFoundCategory(category));
+        await this.adminAuditService.recordWithExecutor(tx, {
+          actor: context.actor,
+          action: "update",
+          entityType: "category",
+          entityId: response.id,
+          request: context.request,
+          before,
+          after: response
+        });
+
+        return response;
+      });
     } catch (error) {
       throw mapWriteError(error);
     }
   }
 
-  async archive(id: string): Promise<void> {
-    const [category] = await this.database.db
-      .update(categories)
-      .set({
-        status: "archived",
-        updatedAt: new Date()
-      })
-      .where(eq(categories.id, id))
-      .returning({ id: categories.id });
+  async archive(id: string, context: AdminActionContext): Promise<void> {
+    await this.database.db.transaction(async (tx) => {
+      const beforeRows = await tx.select().from(categories).where(eq(categories.id, id)).limit(1);
+      const before = mapCategory(requireFoundCategory(beforeRows.at(0)));
+      const [category] = await tx
+        .update(categories)
+        .set({
+          status: "archived",
+          updatedAt: new Date()
+        })
+        .where(eq(categories.id, id))
+        .returning();
 
-    if (!category) {
-      throw new NotFoundException("Category not found.");
-    }
+      const after = mapCategory(requireFoundCategory(category));
+      await this.adminAuditService.recordWithExecutor(tx, {
+        actor: context.actor,
+        action: "delete",
+        entityType: "category",
+        entityId: after.id,
+        request: context.request,
+        before,
+        after
+      });
+    });
   }
 
   private async getCategoryRowById(id: string) {

@@ -9,6 +9,7 @@ import type {
 import { products } from "@dealtrust/db";
 import { BadRequestException, Inject, Injectable, NotFoundException } from "@nestjs/common";
 import { and, asc, eq, ilike } from "drizzle-orm";
+import { type AdminActionContext, AdminAuditService } from "../audit/admin-audit.service.js";
 import { DatabaseService } from "../database/database.service.js";
 import { isForeignKeyViolation } from "../database/postgres-errors.js";
 import { mapProduct } from "./product-mapper.js";
@@ -26,24 +27,42 @@ type ProductUpdateValues = {
 
 @Injectable()
 export class ProductsService {
-  constructor(@Inject(DatabaseService) private readonly database: DatabaseService) {}
+  constructor(
+    @Inject(DatabaseService) private readonly database: DatabaseService,
+    @Inject(AdminAuditService) private readonly adminAuditService: AdminAuditService
+  ) {}
 
-  async create(input: CreateAdminProductRequest): Promise<AdminProductResponse> {
+  async create(
+    input: CreateAdminProductRequest,
+    context: AdminActionContext
+  ): Promise<AdminProductResponse> {
     try {
-      const [product] = await this.database.db
-        .insert(products)
-        .values({
-          categoryId: input.categoryId,
-          brandId: input.brandId,
-          name: input.name,
-          model: input.model,
-          description: input.description,
-          imageUrl: input.imageUrl,
-          status: input.status
-        })
-        .returning();
+      return await this.database.db.transaction(async (tx) => {
+        const [product] = await tx
+          .insert(products)
+          .values({
+            categoryId: input.categoryId,
+            brandId: input.brandId,
+            name: input.name,
+            model: input.model,
+            description: input.description,
+            imageUrl: input.imageUrl,
+            status: input.status
+          })
+          .returning();
 
-      return mapProduct(requireProduct(product));
+        const response = mapProduct(requireProduct(product));
+        await this.adminAuditService.recordWithExecutor(tx, {
+          actor: context.actor,
+          action: "create",
+          entityType: "product",
+          entityId: response.id,
+          request: context.request,
+          after: response
+        });
+
+        return response;
+      });
     } catch (error) {
       throw mapWriteError(error);
     }
@@ -73,7 +92,11 @@ export class ProductsService {
     return mapProduct(await this.getProductRowById(id));
   }
 
-  async update(id: string, input: UpdateAdminProductRequest): Promise<AdminProductResponse> {
+  async update(
+    id: string,
+    input: UpdateAdminProductRequest,
+    context: AdminActionContext
+  ): Promise<AdminProductResponse> {
     const values: ProductUpdateValues = {
       updatedAt: new Date()
     };
@@ -107,31 +130,57 @@ export class ProductsService {
     }
 
     try {
-      const [product] = await this.database.db
-        .update(products)
-        .set(values)
-        .where(eq(products.id, id))
-        .returning();
+      return await this.database.db.transaction(async (tx) => {
+        const beforeRows = await tx.select().from(products).where(eq(products.id, id)).limit(1);
+        const before = mapProduct(requireFoundProduct(beforeRows.at(0)));
+        const [product] = await tx
+          .update(products)
+          .set(values)
+          .where(eq(products.id, id))
+          .returning();
 
-      return mapProduct(requireFoundProduct(product));
+        const response = mapProduct(requireFoundProduct(product));
+        await this.adminAuditService.recordWithExecutor(tx, {
+          actor: context.actor,
+          action: "update",
+          entityType: "product",
+          entityId: response.id,
+          request: context.request,
+          before,
+          after: response
+        });
+
+        return response;
+      });
     } catch (error) {
       throw mapWriteError(error);
     }
   }
 
-  async archive(id: string): Promise<void> {
-    const [product] = await this.database.db
-      .update(products)
-      .set({
-        status: "archived",
-        updatedAt: new Date()
-      })
-      .where(eq(products.id, id))
-      .returning({ id: products.id });
+  async archive(id: string, context: AdminActionContext): Promise<void> {
+    await this.database.db.transaction(async (tx) => {
+      const beforeRows = await tx.select().from(products).where(eq(products.id, id)).limit(1);
+      const before = mapProduct(requireFoundProduct(beforeRows.at(0)));
+      const [product] = await tx
+        .update(products)
+        .set({
+          status: "archived",
+          updatedAt: new Date()
+        })
+        .where(eq(products.id, id))
+        .returning();
 
-    if (!product) {
-      throw new NotFoundException("Product not found.");
-    }
+      const after = mapProduct(requireFoundProduct(product));
+      await this.adminAuditService.recordWithExecutor(tx, {
+        actor: context.actor,
+        action: "delete",
+        entityType: "product",
+        entityId: after.id,
+        request: context.request,
+        before,
+        after
+      });
+    });
   }
 
   private async getProductRowById(id: string) {

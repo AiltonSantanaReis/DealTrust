@@ -4,60 +4,60 @@
 
 | Entidade | Responsabilidade |
 | --- | --- |
-| User | Conta, perfil, status, consentimentos e seguranca. |
-| Role | Permissoes operacionais. |
+| User | Conta, perfil, status, consentimentos e segurança. |
+| Role | Permissões operacionais. |
 | Category | Hierarquia de categorias. |
 | Brand | Marcas e aliases. |
-| Product | Produto canonico, sem diferencas de variacao. |
-| ProductVariant | Cor, voltagem, memoria, tamanho, edicao e modelo especifico. |
-| Store | Loja, dominio, reputacao e status. |
-| Offer | Anuncio atual de uma loja para uma variacao. |
-| PriceSnapshot | Historico de preco, frete, cupom, estoque e disponibilidade. |
-| PriceAlert | Regra de monitoramento criada pelo usuario. |
+| Product | Produto canônico, sem diferenças de variação. |
+| ProductVariant | Cor, voltagem, memória, tamanho, edição e modelo específico. |
+| Store | Loja, domínio, reputação e status. |
+| Offer | Anúncio atual de uma loja para uma variação. |
+| PriceSnapshot | Histórico de preço, frete, cupom, estoque e disponibilidade. |
+| PriceAlert | Regra de monitoramento criada pelo usuário. |
 | FavoriteList | Listas pessoais de produtos. |
 | Notification | Registro de envio por canal. |
 | ClickEvent | Clique em oferta, origem e contexto. |
-| AdminAuditLog | Auditoria de acoes administrativas. |
+| AdminAuditLog | Auditoria de ações administrativas. |
 | DataSource | Origem de dados: manual, feed, API, afiliado ou coletor. |
 
-## Decisoes de modelagem
+## Decisões de modelagem
 
-- Usar IDs publicos opacos para entidades expostas em API.
+- Usar IDs públicos opacos para entidades expostas em API.
 - Usar timestamps com timezone.
-- Separar `Product` de `ProductVariant` para evitar historico misturado.
-- Nunca sobrescrever preco historico; corrigir por novo registro auditavel.
+- Separar `Product` de `ProductVariant` para evitar histórico misturado.
+- Nunca sobrescrever preço histórico; corrigir por novo registro auditável.
 - Particionar `PriceSnapshot` por tempo quando o volume crescer.
-- Criar indices por `product_variant_id`, `store_id`, `captured_at` e disponibilidade.
-- Guardar preco em centavos inteiros, nao decimal flutuante.
+- Criar índices por `product_variant_id`, `store_id`, `captured_at` e disponibilidade.
+- Guardar preço em centavos inteiros, não decimal flutuante.
 - Guardar moeda explicitamente, mesmo que o MVP comece em BRL.
 
-## Regras criticas
+## Regras críticas
 
-### Preco bom
+### Preço relevante
 
-Preco atual abaixo da media dos ultimos 30 ou 90 dias, respeitando margem minima por categoria.
+Preço atual abaixo da média dos últimos 30 ou 90 dias, respeitando margem mínima por categoria.
 
-### Menor preco historico
+### Menor preço histórico
 
-Preco atual igual ou inferior ao menor preco registrado na janela analisada.
+Preço atual igual ou inferior ao menor preço registrado na janela analisada.
 
-### Oferta potencialmente enganosa
+### Oferta inconsistente
 
-Indicio de aumento artificial antes do desconto ou desconto baseado em preco de referencia inconsistente.
+Indício de aumento artificial antes do desconto ou desconto baseado em preço de referência inconsistente.
 
-### Preco final
+### Preço final
 
-Sempre que houver dados confiaveis, calcular:
+Sempre que houver dados confiáveis, calcular:
 
 ```text
 preco_final = preco_produto + frete - cupom - cashback_confirmado
 ```
 
-### Loja confiavel
+### Loja confiável
 
-Combinar dominio validado, reputacao, historico interno, consistencia de ofertas e denuncias.
+Combinar domínio validado, reputação, histórico interno, consistência de ofertas e indicadores operacionais.
 
-## Eventos de dominio
+## Eventos de domínio
 
 - UserRegistered
 - ProductCreated
@@ -65,7 +65,7 @@ Combinar dominio validado, reputacao, historico interno, consistencia de ofertas
 - OfferCaptured
 - PriceUpdated
 - HistoricalLowDetected
-- SuspiciousDiscountDetected
+- InconsistentDiscountDetected
 - PriceAlertTriggered
 - NotificationRequested
 - StoreBlocked
