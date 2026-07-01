@@ -30,6 +30,8 @@ Principais endpoints atuais:
 - `POST /auth/register`
 - `POST /auth/login`
 - `GET /auth/me`
+- `GET /products`
+- `GET /products/:id`
 - `GET|POST|PATCH|DELETE /admin/categories`
 - `GET|POST|PATCH|DELETE /admin/brands`
 - `GET|POST|PATCH|DELETE /admin/products`

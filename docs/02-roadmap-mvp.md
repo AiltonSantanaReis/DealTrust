@@ -28,9 +28,9 @@ Objetivo: permitir cadastro e manutenção manual dos dados iniciais.
 Objetivo: apresentar evidências objetivas para apoiar a decisão de compra.
 
 - Busca de produtos com filtros simples.
-- Página de produto com preço atual, lojas e histórico.
-- Gráfico de 7, 30, 90 e 180 dias.
-- Indicadores: menor preço histórico, oportunidade relevante, tendência e confiabilidade da loja.
+- API de detalhe de produto com preço atual, lojas e histórico.
+- Indicadores: menor preço histórico, oportunidade relevante, disponibilidade e confiabilidade da loja.
+- Gráfico de 7, 30, 90 e 180 dias na interface.
 - Cálculo de preço final com frete, cupom e cashback confirmado quando existir.
 
 ## Marco 3 - Alertas e recorrência

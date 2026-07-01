@@ -15,6 +15,7 @@
   },
   "dependencies": {
     "@dealtrust/contracts": "workspace:*",
+    "@dealtrust/core": "workspace:*",
     "@dealtrust/db": "workspace:*",
     "@nestjs/common": "^11.1.27",
     "@nestjs/core": "^11.1.27",

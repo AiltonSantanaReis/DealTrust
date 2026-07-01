@@ -7,6 +7,9 @@ export default defineConfig({
       "@dealtrust/contracts": fileURLToPath(
         new URL("../../packages/contracts/src/index.ts", import.meta.url)
       ),
+      "@dealtrust/core": fileURLToPath(
+        new URL("../../packages/core/src/index.ts", import.meta.url)
+      ),
       "@dealtrust/db": fileURLToPath(new URL("../../packages/db/src/index.ts", import.meta.url))
     }
   }

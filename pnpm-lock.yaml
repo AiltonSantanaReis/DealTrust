@@ -28,6 +28,9 @@ importers:
       '@dealtrust/contracts':
         specifier: workspace:*
         version: link:../../packages/contracts
+      '@dealtrust/core':
+        specifier: workspace:*
+        version: link:../../packages/core
       '@dealtrust/db':
         specifier: workspace:*
         version: link:../../packages/db

@@ -22,6 +22,8 @@ Recursos implementados:
 - Registro manual de snapshots de preço.
 - Auditoria administrativa transacional com antes/depois, contexto da requisição e filtros por entidade.
 - Headers HTTP defensivos e rate limit global configurável.
+- Busca pública de produtos ativos com menor oferta disponível.
+- Detalhe público de produto com variações, ofertas ativas, histórico recente e análise de preço.
 - Testes unitários, contratos compartilhados e testes e2e com PostgreSQL real.
 - CI com lint, typecheck, testes, build e smoke test da API compilada.
 
@@ -163,6 +165,8 @@ Endpoints disponíveis:
 - `POST /auth/register`
 - `POST /auth/login`
 - `GET /auth/me`
+- `GET /products`
+- `GET /products/:id`
 - `GET /admin/categories`
 - `POST /admin/categories`
 - `GET /admin/categories/:id`
@@ -248,6 +252,7 @@ Cobertura atual de validação:
 - CRUD administrativo de categorias, marcas, produtos, variações, lojas, ofertas e snapshots validado com PostgreSQL real.
 - Auditoria administrativa validada em fluxo e2e com consulta por entidade.
 - Headers defensivos e rate limit global validados pela pilha real Nest/Fastify.
+- Busca e detalhe público de produtos validados com PostgreSQL real.
 - Hash de senha validado com Argon2id.
 - JWT validado com issuer, audience, subject e claims.
 
@@ -272,10 +277,10 @@ Marco 1 - Backend base e administração inicial:
 
 Marco 2 - Produto público e histórico:
 
-- Busca de produtos.
-- Página de produto com preço atual, lojas e histórico.
-- Gráficos de 7, 30, 90 e 180 dias.
-- Indicadores de preço histórico, oportunidade, disponibilidade e confiabilidade da loja.
+- Busca pública de produtos ativos. Base implementada.
+- API de detalhe de produto com preço atual, lojas e histórico. Base implementada.
+- Indicadores de preço histórico, oportunidade, disponibilidade e confiabilidade da loja. Base implementada.
+- Gráficos de 7, 30, 90 e 180 dias. Pendente na interface.
 
 Marco 3 - Alertas e recorrência:
 

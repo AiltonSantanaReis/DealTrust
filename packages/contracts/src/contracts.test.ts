@@ -23,7 +23,9 @@ import {
   adminProductVariantListQuerySchema,
   createAdminProductRequestSchema,
   createAdminProductVariantRequestSchema,
+  productDetailQuerySchema,
   productSearchQuerySchema,
+  publicProductDetailResponseSchema,
   updateAdminProductRequestSchema,
   updateAdminProductVariantRequestSchema
 } from "./products.js";
@@ -234,14 +236,14 @@ describe("alert contracts", () => {
 });
 
 describe("product search contract", () => {
-  it("coerces pagination and defaults status", () => {
+  it("coerces public product search pagination", () => {
     const parsed = productSearchQuerySchema.parse({
       limit: "50",
       q: "console"
     });
 
     expect(parsed.limit).toBe(50);
-    expect(parsed.status).toBe("active");
+    expect(parsed.q).toBe("console");
   });
 
   it("defaults admin products to draft status", () => {
@@ -291,6 +293,52 @@ describe("product search contract", () => {
 
     expect(parsed.limit).toBe(15);
     expect(parsed.productId).toBe(productId);
+  });
+
+  it("coerces product detail history controls", () => {
+    const parsed = productDetailQuerySchema.parse({
+      historyDays: "120",
+      historyLimit: "200"
+    });
+
+    expect(parsed.historyDays).toBe(120);
+    expect(parsed.historyLimit).toBe(200);
+  });
+
+  it("accepts public product detail responses with offers and history", () => {
+    const parsed = publicProductDetailResponseSchema.parse({
+      id: productId,
+      name: "Demo Console Pro",
+      model: "DCP-1000",
+      description: "Reference product.",
+      imageUrl: "https://example.com/products/demo-console-pro.jpg",
+      brand: {
+        id: "2f93c130-e845-47db-9472-6d5c1ac6f9ab",
+        name: "Example Electronics",
+        slug: "example-electronics"
+      },
+      category: {
+        id: "53cf458e-8c72-48f4-bcd4-9b4a8d649c7c",
+        name: "Electronics",
+        slug: "electronics"
+      },
+      lowestOffer: null,
+      offerCount: 0,
+      inStockOfferCount: 0,
+      variants: [],
+      offers: [],
+      priceHistory: [],
+      priceAnalysis: {
+        label: "insufficient_history",
+        currentPrice: null,
+        averagePrice: null,
+        historicalLow: null,
+        discountFromAveragePercent: null,
+        snapshotCount: 0
+      }
+    });
+
+    expect(parsed.priceAnalysis.label).toBe("insufficient_history");
   });
 });
 

@@ -10,6 +10,8 @@ import { BrandsService } from "./brands.service.js";
 import { CategoriesService } from "./categories.service.js";
 import { ProductVariantsService } from "./product-variants.service.js";
 import { ProductsService } from "./products.service.js";
+import { PublicProductsController } from "./public-products.controller.js";
+import { PublicProductsService } from "./public-products.service.js";
 
 @Module({
   imports: [AuthModule, AuditModule, DatabaseModule],
@@ -17,8 +19,15 @@ import { ProductsService } from "./products.service.js";
     AdminBrandsController,
     AdminCategoriesController,
     AdminProductVariantsController,
-    AdminProductsController
+    AdminProductsController,
+    PublicProductsController
   ],
-  providers: [BrandsService, CategoriesService, ProductVariantsService, ProductsService]
+  providers: [
+    BrandsService,
+    CategoriesService,
+    ProductVariantsService,
+    ProductsService,
+    PublicProductsService
+  ]
 })
 export class CatalogModule {}
