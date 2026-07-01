@@ -108,6 +108,13 @@ describe.skipIf(!testDatabaseUrl)("POST /auth", () => {
     expect(registerToken.payload.sub).toBe(registerSession.user.id);
     expect(registerToken.payload.role).toBe("user");
 
+    const meResponse = await injectHttp("GET", "/auth/me", registerSession.accessToken);
+    expect(meResponse.statusCode).toBe(200);
+    expect(JSON.parse(meResponse.payload)).toEqual(registerSession.user);
+
+    const anonymousMeResponse = await injectHttp("GET", "/auth/me");
+    expect(anonymousMeResponse.statusCode).toBe(401);
+
     const storedUser = await findStoredUserByEmail(email);
 
     expect(storedUser.passwordHash).not.toBe(password);
@@ -157,6 +164,22 @@ describe.skipIf(!testDatabaseUrl)("POST /auth", () => {
         },
         payload: JSON.stringify(payload)
       });
+  }
+
+  async function injectHttp(method: "GET", url: string, accessToken?: string) {
+    const request = {
+      method,
+      url,
+      ...(accessToken
+        ? {
+            headers: {
+              authorization: `Bearer ${accessToken}`
+            }
+          }
+        : {})
+    };
+
+    return requireValue(app).getHttpAdapter().getInstance().inject(request);
   }
 
   async function findStoredUserByEmail(email: string) {

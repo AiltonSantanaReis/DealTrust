@@ -1,8 +1,17 @@
 import { TextEncoder } from "node:util";
-import type { AuthUser } from "@dealtrust/contracts";
+import { type AuthUser, authUserRoleSchema } from "@dealtrust/contracts";
 import { Inject, Injectable } from "@nestjs/common";
-import { SignJWT } from "jose";
+import { jwtVerify, SignJWT } from "jose";
+import { z } from "zod";
 import { API_CONFIG, type ApiConfig } from "../config/api-config.js";
+
+const accessTokenClaimsSchema = z.object({
+  sub: z.string().uuid(),
+  email: z.string().email(),
+  role: authUserRoleSchema
+});
+
+export type AccessTokenClaims = z.infer<typeof accessTokenClaimsSchema>;
 
 @Injectable()
 export class TokenService {
@@ -28,5 +37,18 @@ export class TokenService {
       .setIssuedAt()
       .setExpirationTime(`${this.config.authAccessTokenTtlSeconds}s`)
       .sign(this.secretKey);
+  }
+
+  async verifyAccessToken(token: string): Promise<AccessTokenClaims | undefined> {
+    try {
+      const verified = await jwtVerify(token, this.secretKey, {
+        issuer: "dealtrust-api",
+        audience: "dealtrust-users"
+      });
+
+      return accessTokenClaimsSchema.parse(verified.payload);
+    } catch {
+      return undefined;
+    }
   }
 }

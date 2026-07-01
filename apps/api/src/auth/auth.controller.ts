@@ -1,12 +1,15 @@
 import {
   type AuthSession,
   authSessionSchema,
+  authUserSchema,
   loginRequestSchema,
   registerRequestSchema
 } from "@dealtrust/contracts";
-import { Body, Controller, HttpCode, Inject, Post } from "@nestjs/common";
+import { Body, Controller, Get, HttpCode, Inject, Post, UseGuards } from "@nestjs/common";
 import { parseRequestBody } from "../shared/validation.js";
 import { AuthService } from "./auth.service.js";
+import { CurrentUser } from "./current-user.decorator.js";
+import { JwtAuthGuard } from "./jwt-auth.guard.js";
 
 @Controller("auth")
 export class AuthController {
@@ -27,5 +30,11 @@ export class AuthController {
     const session = await this.authService.login(request);
 
     return authSessionSchema.parse(session);
+  }
+
+  @Get("me")
+  @UseGuards(JwtAuthGuard)
+  getCurrentUser(@CurrentUser() user: AuthSession["user"]): AuthSession["user"] {
+    return authUserSchema.parse(user);
   }
 }

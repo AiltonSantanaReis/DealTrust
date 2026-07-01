@@ -3,12 +3,18 @@ import { users } from "@dealtrust/db";
 import { ConflictException, Inject, Injectable, UnauthorizedException } from "@nestjs/common";
 import { eq } from "drizzle-orm";
 import { DatabaseService } from "../database/database.service.js";
+import { isUniqueViolation } from "../database/postgres-errors.js";
 import { PasswordService } from "./password.service.js";
 import { TokenService } from "./token.service.js";
 
-type StoredUser = AuthUser & {
+type UserStatus = "active" | "pending_verification" | "blocked" | "deleted";
+
+type StoredUserProfile = AuthUser & {
+  readonly status: UserStatus;
+};
+
+type StoredUser = StoredUserProfile & {
   readonly passwordHash: string;
-  readonly status: "active" | "pending_verification" | "blocked" | "deleted";
 };
 
 @Injectable()
@@ -81,6 +87,32 @@ export class AuthService {
     return this.createSession(toAuthUser(user));
   }
 
+  async findActiveUserById(id: string): Promise<AuthUser | undefined> {
+    const rows = await this.database.db
+      .select({
+        id: users.id,
+        name: users.name,
+        email: users.email,
+        role: users.role,
+        status: users.status
+      })
+      .from(users)
+      .where(eq(users.id, id))
+      .limit(1);
+
+    const user = rows.at(0);
+
+    if (!user) {
+      return undefined;
+    }
+
+    if (user.status !== "active") {
+      return undefined;
+    }
+
+    return toAuthUser(user);
+  }
+
   private async findUserByEmail(email: string): Promise<StoredUser | undefined> {
     const rows = await this.database.db
       .select({
@@ -108,7 +140,7 @@ export class AuthService {
   }
 }
 
-function toAuthUser(user: StoredUser): AuthUser {
+function toAuthUser(user: StoredUserProfile): AuthUser {
   return {
     id: user.id,
     name: user.name,
@@ -123,20 +155,4 @@ function requireCreatedUser(user: AuthUser | undefined): AuthUser {
   }
 
   return user;
-}
-
-function isUniqueViolation(error: unknown): boolean {
-  return hasPostgresErrorCode(error, "23505");
-}
-
-function hasPostgresErrorCode(error: unknown, code: string, depth = 0): boolean {
-  if (depth > 3 || typeof error !== "object" || error === null) {
-    return false;
-  }
-
-  return (
-    ("code" in error && (error as { readonly code?: unknown }).code === code) ||
-    ("cause" in error &&
-      hasPostgresErrorCode((error as { readonly cause?: unknown }).cause, code, depth + 1))
-  );
 }

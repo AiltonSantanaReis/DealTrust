@@ -1,6 +1,11 @@
 import { describe, expect, it } from "vitest";
 import { createPriceAlertRequestSchema } from "./alerts.js";
 import { authSessionSchema, loginRequestSchema, registerRequestSchema } from "./auth.js";
+import {
+  categoryListQuerySchema,
+  createCategoryRequestSchema,
+  updateCategoryRequestSchema
+} from "./catalog.js";
 import { moneySchema } from "./common.js";
 import { createOfferRequestSchema } from "./offers.js";
 import { productSearchQuerySchema } from "./products.js";
@@ -60,6 +65,35 @@ describe("money contract", () => {
 
   it("rejects fractional cents", () => {
     expect(() => moneySchema.parse({ amountCents: 19.9, currency: "BRL" })).toThrow();
+  });
+});
+
+describe("catalog contracts", () => {
+  it("defaults new categories to active status", () => {
+    const parsed = createCategoryRequestSchema.parse({
+      name: "Video Games",
+      slug: "video-games"
+    });
+
+    expect(parsed).toEqual({
+      name: "Video Games",
+      slug: "video-games",
+      status: "active"
+    });
+  });
+
+  it("rejects category updates without fields", () => {
+    expect(() => updateCategoryRequestSchema.parse({})).toThrow();
+  });
+
+  it("coerces category list limits", () => {
+    const parsed = categoryListQuerySchema.parse({
+      limit: "50",
+      status: "active"
+    });
+
+    expect(parsed.limit).toBe(50);
+    expect(parsed.status).toBe("active");
   });
 });
 

@@ -6,7 +6,7 @@ import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import { AppModule } from "../src/app.module.js";
 
 describe("GET /health", () => {
-  let app: NestFastifyApplication;
+  let app: NestFastifyApplication | undefined;
   const originalEnv = process.env;
 
   beforeAll(async () => {
@@ -29,12 +29,15 @@ describe("GET /health", () => {
   });
 
   afterAll(async () => {
-    await app.close();
+    if (app) {
+      await app.close();
+    }
+
     process.env = originalEnv;
   });
 
   it("returns live API health metadata through the real Nest/Fastify stack", async () => {
-    const response = await app.getHttpAdapter().getInstance().inject({
+    const response = await requireValue(app).getHttpAdapter().getInstance().inject({
       method: "GET",
       url: "/health"
     });
@@ -65,3 +68,11 @@ describe("GET /health", () => {
     expect(body.dependencies.valkey.configured).toBe(true);
   });
 });
+
+function requireValue<T>(value: T | undefined): T {
+  if (!value) {
+    throw new Error("Expected value.");
+  }
+
+  return value;
+}
