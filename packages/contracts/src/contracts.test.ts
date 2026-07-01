@@ -328,6 +328,21 @@ describe("product search contract", () => {
       variants: [],
       offers: [],
       priceHistory: [],
+      priceWindows: [
+        {
+          days: 7,
+          snapshotCount: 0,
+          latestSnapshotAt: null,
+          analysis: {
+            label: "insufficient_history",
+            currentPrice: null,
+            averagePrice: null,
+            historicalLow: null,
+            discountFromAveragePercent: null,
+            snapshotCount: 0
+          }
+        }
+      ],
       priceAnalysis: {
         label: "insufficient_history",
         currentPrice: null,

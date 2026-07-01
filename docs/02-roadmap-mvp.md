@@ -30,7 +30,8 @@ Objetivo: apresentar evidências objetivas para apoiar a decisão de compra.
 - Busca de produtos com filtros simples.
 - API de detalhe de produto com preço atual, lojas e histórico.
 - Indicadores: menor preço histórico, oportunidade relevante, disponibilidade e confiabilidade da loja.
-- Gráfico de 7, 30, 90 e 180 dias na interface.
+- Dados para gráfico de 7, 30, 90 e 180 dias.
+- Interface para visualização dos gráficos.
 - Cálculo de preço final com frete, cupom e cashback confirmado quando existir.
 
 ## Marco 3 - Alertas e recorrência

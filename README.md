@@ -24,6 +24,8 @@ Recursos implementados:
 - Headers HTTP defensivos e rate limit global configurável.
 - Busca pública de produtos ativos com menor oferta disponível.
 - Detalhe público de produto com variações, ofertas ativas, histórico recente e análise de preço.
+- Janelas de histórico de 7, 30, 90 e 180 dias para gráficos e indicadores.
+- Cálculo de preço final de snapshots com frete, cupom e cashback confirmado.
 - Testes unitários, contratos compartilhados e testes e2e com PostgreSQL real.
 - CI com lint, typecheck, testes, build e smoke test da API compilada.
 
@@ -252,7 +254,7 @@ Cobertura atual de validação:
 - CRUD administrativo de categorias, marcas, produtos, variações, lojas, ofertas e snapshots validado com PostgreSQL real.
 - Auditoria administrativa validada em fluxo e2e com consulta por entidade.
 - Headers defensivos e rate limit global validados pela pilha real Nest/Fastify.
-- Busca e detalhe público de produtos validados com PostgreSQL real.
+- Busca, detalhe público, janelas de histórico e cálculo de preço final validados com PostgreSQL real.
 - Hash de senha validado com Argon2id.
 - JWT validado com issuer, audience, subject e claims.
 
@@ -280,7 +282,8 @@ Marco 2 - Produto público e histórico:
 - Busca pública de produtos ativos. Base implementada.
 - API de detalhe de produto com preço atual, lojas e histórico. Base implementada.
 - Indicadores de preço histórico, oportunidade, disponibilidade e confiabilidade da loja. Base implementada.
-- Gráficos de 7, 30, 90 e 180 dias. Pendente na interface.
+- Dados para gráficos de 7, 30, 90 e 180 dias. Base implementada.
+- Interface gráfica para histórico. Pendente.
 
 Marco 3 - Alertas e recorrência:
 

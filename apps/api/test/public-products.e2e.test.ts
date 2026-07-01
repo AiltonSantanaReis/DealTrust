@@ -113,10 +113,17 @@ describe.skipIf(!testDatabaseUrl)("public products", () => {
     expect(detail.category.name).toBe("Electronics");
     expect(detail.variants).toHaveLength(1);
     expect(detail.offers).toHaveLength(2);
-    expect(detail.priceHistory).toHaveLength(2);
+    expect(detail.priceHistory).toHaveLength(4);
+    expect(detail.priceHistory.at(-1)?.couponDiscount.amountCents).toBe(20_00);
+    expect(detail.priceHistory.at(-1)?.confirmedCashback.amountCents).toBe(5_00);
+    expect(detail.priceHistory.at(-1)?.finalPrice.amountCents).toBe(265_00);
+    expect(detail.priceWindows.map((window) => window.days)).toEqual([7, 30, 90, 180]);
+    expect(detail.priceWindows.map((window) => window.snapshotCount)).toEqual([0, 2, 3, 4]);
+    expect(detail.priceWindows[0]?.analysis.label).toBe("insufficient_history");
+    expect(detail.priceWindows[1]?.analysis.historicalLow?.amountCents).toBe(265_00);
     expect(detail.priceAnalysis.label).toBe("historical_low");
     expect(detail.priceAnalysis.currentPrice?.amountCents).toBe(260_00);
-    expect(detail.priceAnalysis.historicalLow?.amountCents).toBe(290_00);
+    expect(detail.priceAnalysis.historicalLow?.amountCents).toBe(265_00);
 
     const draftDetailResponse = await injectHttp("GET", `/products/${fixture.draftProductId}`);
     expect(draftDetailResponse.statusCode).toBe(404);
@@ -258,6 +265,24 @@ describe.skipIf(!testDatabaseUrl)("public products", () => {
     await db.insert(priceSnapshots).values([
       {
         offerId: requireValue(lowestOffer).id,
+        priceCents: 380_00,
+        shippingCents: 20_00,
+        currency: "BRL",
+        available: true,
+        capturedAt: daysAgo(170)
+      },
+      {
+        offerId: requireValue(lowestOffer).id,
+        priceCents: 330_00,
+        shippingCents: 10_00,
+        couponDiscountCents: 20_00,
+        confirmedCashbackCents: 5_00,
+        currency: "BRL",
+        available: true,
+        capturedAt: daysAgo(45)
+      },
+      {
+        offerId: requireValue(lowestOffer).id,
         priceCents: 300_00,
         shippingCents: 0,
         currency: "BRL",
@@ -268,6 +293,8 @@ describe.skipIf(!testDatabaseUrl)("public products", () => {
         offerId: requireValue(lowestOffer).id,
         priceCents: 290_00,
         shippingCents: 0,
+        couponDiscountCents: 20_00,
+        confirmedCashbackCents: 5_00,
         currency: "BRL",
         available: true,
         capturedAt: daysAgo(10)

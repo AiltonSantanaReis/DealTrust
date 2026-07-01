@@ -15,6 +15,8 @@ Backend NestJS planejado para os domínios:
 
 Primeiro objetivo: API REST com OpenAPI, autenticação, CRUD administrativo, auditoria completa e regras de histórico de preço.
 
+O detalhe público de produto retorna ofertas ativas, snapshots recentes, análise de preço e janelas de 7, 30, 90 e 180 dias para consumo por uma interface de gráfico.
+
 Comandos iniciais:
 
 ```bash

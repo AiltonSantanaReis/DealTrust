@@ -170,6 +170,8 @@ export const publicProductPriceSnapshotSchema = z.object({
   capturedAt: z.iso.datetime(),
   price: moneySchema,
   shipping: moneySchema,
+  couponDiscount: moneySchema,
+  confirmedCashback: moneySchema,
   finalPrice: moneySchema,
   available: z.boolean()
 });
@@ -181,6 +183,13 @@ export const publicProductPriceAnalysisSchema = z.object({
   historicalLow: moneySchema.nullable(),
   discountFromAveragePercent: z.number().nullable(),
   snapshotCount: z.number().int().nonnegative()
+});
+
+export const publicProductPriceWindowSchema = z.object({
+  days: z.union([z.literal(7), z.literal(30), z.literal(90), z.literal(180)]),
+  snapshotCount: z.number().int().nonnegative(),
+  latestSnapshotAt: z.iso.datetime().nullable(),
+  analysis: publicProductPriceAnalysisSchema
 });
 
 export const publicProductSummarySchema = z.object({
@@ -204,6 +213,7 @@ export const publicProductDetailResponseSchema = publicProductSummarySchema.exte
   variants: z.array(publicProductVariantSchema),
   offers: z.array(publicProductOfferSchema),
   priceHistory: z.array(publicProductPriceSnapshotSchema),
+  priceWindows: z.array(publicProductPriceWindowSchema),
   priceAnalysis: publicProductPriceAnalysisSchema
 });
 
@@ -229,6 +239,7 @@ export type AdminProductVariantListResponse = z.infer<typeof adminProductVariant
 export type PriceOpportunityLabel = z.infer<typeof priceOpportunityLabelSchema>;
 export type PublicProductOffer = z.infer<typeof publicProductOfferSchema>;
 export type PublicProductPriceSnapshot = z.infer<typeof publicProductPriceSnapshotSchema>;
+export type PublicProductPriceWindow = z.infer<typeof publicProductPriceWindowSchema>;
 export type PublicProductSummary = z.infer<typeof publicProductSummarySchema>;
 export type ProductSearchResponse = z.infer<typeof productSearchResponseSchema>;
 export type PublicProductDetailResponse = z.infer<typeof publicProductDetailResponseSchema>;

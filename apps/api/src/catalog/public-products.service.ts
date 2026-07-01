@@ -6,6 +6,7 @@ import type {
   PublicProductDetailResponse,
   PublicProductOffer,
   PublicProductPriceSnapshot,
+  PublicProductPriceWindow,
   PublicProductSummary
 } from "@dealtrust/contracts";
 import {
@@ -70,10 +71,16 @@ type SnapshotRow = {
   readonly offerId: string;
   readonly priceCents: number;
   readonly shippingCents: number;
+  readonly couponDiscountCents: number;
+  readonly confirmedCashbackCents: number;
   readonly currency: string;
   readonly available: boolean;
   readonly capturedAt: Date;
 };
+
+const chartWindowDays = [7, 30, 90, 180] as const;
+const maxChartWindowDays = 180;
+const maxChartSnapshotLimit = 500;
 
 @Injectable()
 export class PublicProductsService {
@@ -98,13 +105,18 @@ export class PublicProductsService {
     const variants = await this.selectActiveVariants([product.id]);
     const offerRows = await this.selectActiveOffers(variants.map((variant) => variant.id));
     const offerDtos = offerRows.map(mapOffer);
-    const priceHistory = await this.selectPriceHistory(
+    const priceHistoryRows = await this.selectPriceHistory(
       offerRows.map((offer) => offer.id),
-      query
+      Math.max(query.historyDays, maxChartWindowDays),
+      maxChartSnapshotLimit
     );
-    const snapshotDtos = priceHistory.map(mapSnapshot);
+    const allSnapshotDtos = sortSnapshotsAscending(priceHistoryRows.map(mapSnapshot));
+    const snapshotDtos = allSnapshotDtos
+      .filter((snapshot) => isWithinDays(snapshot.capturedAt, query.historyDays))
+      .slice(-query.historyLimit);
     const summary = buildSummary(product, offerDtos);
     const priceAnalysis = buildPriceAnalysis(summary.lowestOffer, snapshotDtos);
+    const priceWindows = buildPriceWindows(summary.lowestOffer, allSnapshotDtos);
 
     return {
       ...summary,
@@ -119,6 +131,7 @@ export class PublicProductsService {
       })),
       offers: offerDtos,
       priceHistory: snapshotDtos,
+      priceWindows,
       priceAnalysis
     };
   }
@@ -259,19 +272,22 @@ export class PublicProductsService {
 
   private async selectPriceHistory(
     offerIds: readonly string[],
-    query: ProductDetailQuery
+    historyDays: number,
+    historyLimit: number
   ): Promise<SnapshotRow[]> {
     if (offerIds.length === 0) {
       return [];
     }
 
-    const capturedAfter = new Date(Date.now() - query.historyDays * 24 * 60 * 60 * 1000);
+    const capturedAfter = new Date(Date.now() - historyDays * 24 * 60 * 60 * 1000);
 
     return this.database.db
       .select({
         offerId: priceSnapshots.offerId,
         priceCents: priceSnapshots.priceCents,
         shippingCents: priceSnapshots.shippingCents,
+        couponDiscountCents: priceSnapshots.couponDiscountCents,
+        confirmedCashbackCents: priceSnapshots.confirmedCashbackCents,
         currency: priceSnapshots.currency,
         available: priceSnapshots.available,
         capturedAt: priceSnapshots.capturedAt
@@ -284,7 +300,7 @@ export class PublicProductsService {
         )
       )
       .orderBy(desc(priceSnapshots.capturedAt), desc(priceSnapshots.offerId))
-      .limit(query.historyLimit);
+      .limit(historyLimit);
   }
 }
 
@@ -341,6 +357,23 @@ function buildPriceAnalysis(
   return mapAnalysis(analysis);
 }
 
+function buildPriceWindows(
+  lowestOffer: PublicProductOffer | null,
+  snapshots: readonly PublicProductPriceSnapshot[]
+): PublicProductPriceWindow[] {
+  return chartWindowDays.map((days) => {
+    const windowSnapshots = snapshots.filter((snapshot) => isWithinDays(snapshot.capturedAt, days));
+    const latestSnapshot = windowSnapshots.at(-1);
+
+    return {
+      days,
+      snapshotCount: windowSnapshots.length,
+      latestSnapshotAt: latestSnapshot?.capturedAt ?? null,
+      analysis: buildPriceAnalysis(lowestOffer, windowSnapshots)
+    };
+  });
+}
+
 function mapAnalysis(analysis: PriceOpportunityAnalysis) {
   return {
     label: analysis.label,
@@ -377,13 +410,26 @@ function mapOffer(row: OfferRow): PublicProductOffer {
 
 function mapSnapshot(row: SnapshotRow): PublicProductPriceSnapshot {
   const currency = normalizeCurrency(row.currency);
+  const couponDiscount = createMoney(row.couponDiscountCents, currency);
+  const confirmedCashback = createMoney(row.confirmedCashbackCents, currency);
 
   return {
     offerId: row.offerId,
     capturedAt: row.capturedAt.toISOString(),
     price: createMoney(row.priceCents, currency),
     shipping: createMoney(row.shippingCents, currency),
-    finalPrice: createMoney(row.priceCents + row.shippingCents, currency),
+    couponDiscount,
+    confirmedCashback,
+    finalPrice: createMoney(
+      Math.max(
+        0,
+        row.priceCents +
+          row.shippingCents -
+          couponDiscount.amountCents -
+          confirmedCashback.amountCents
+      ),
+      currency
+    ),
     available: row.available
   };
 }
@@ -408,6 +454,20 @@ function normalizeCurrency(currency: string): CurrencyCode {
   }
 
   return currency;
+}
+
+function sortSnapshotsAscending(
+  snapshots: readonly PublicProductPriceSnapshot[]
+): PublicProductPriceSnapshot[] {
+  return [...snapshots].sort(
+    (left, right) =>
+      new Date(left.capturedAt).getTime() - new Date(right.capturedAt).getTime() ||
+      left.offerId.localeCompare(right.offerId)
+  );
+}
+
+function isWithinDays(capturedAt: string, days: number): boolean {
+  return new Date(capturedAt).getTime() >= Date.now() - days * 24 * 60 * 60 * 1000;
 }
 
 function groupBy<T>(
