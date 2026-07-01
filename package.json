@@ -9,7 +9,7 @@
     "pnpm": ">=11 <12"
   },
   "scripts": {
-    "verify": "pnpm lint && pnpm typecheck && pnpm test:run",
+    "verify": "pnpm lint && pnpm typecheck && pnpm test:run && pnpm build && pnpm --filter @dealtrust/api smoke:compiled",
     "dev": "pnpm -r --parallel --if-present dev",
     "build": "pnpm -r --if-present build",
     "test": "pnpm -r --if-present test",

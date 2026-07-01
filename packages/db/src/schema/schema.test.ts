@@ -1,5 +1,6 @@
 import { getTableColumns, getTableName } from "drizzle-orm";
 import { describe, expect, it } from "vitest";
+import { createDatabaseClient, createSqlClient } from "../client.js";
 import {
   favoriteLists,
   offers,
@@ -12,6 +13,17 @@ import {
 } from "./index.js";
 
 describe("database schema", () => {
+  it("creates a typed database client without opening a query", async () => {
+    const sqlClient = createSqlClient("postgres://dealtrust:dealtrust@localhost:5432/dealtrust", {
+      max: 1
+    });
+    const db = createDatabaseClient(sqlClient);
+
+    expect(db).toBeDefined();
+
+    await sqlClient.end({ timeout: 1 });
+  });
+
   it("exports the initial MVP table set", () => {
     const tableNames = schemaTables.map((table) => getTableName(table));
 

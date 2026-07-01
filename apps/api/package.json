@@ -3,5 +3,27 @@
   "version": "0.1.0",
   "private": true,
   "type": "module",
-  "description": "Backend API do DealTrust."
+  "description": "Backend API do DealTrust.",
+  "scripts": {
+    "build": "tsc -p tsconfig.build.json",
+    "dev": "tsx watch src/main.ts",
+    "smoke:compiled": "node scripts/smoke-compiled-api.mjs",
+    "start": "node dist/src/main.js",
+    "test": "vitest",
+    "test:run": "vitest run",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@dealtrust/db": "workspace:*",
+    "@nestjs/common": "^11.1.27",
+    "@nestjs/core": "^11.1.27",
+    "@nestjs/platform-fastify": "^11.1.27",
+    "reflect-metadata": "^0.2.2",
+    "rxjs": "^7.8.2",
+    "zod": "^4.4.3"
+  },
+  "devDependencies": {
+    "@nestjs/testing": "^11.1.27",
+    "tsx": "^4.22.4"
+  }
 }
