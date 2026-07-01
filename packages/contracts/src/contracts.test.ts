@@ -2,8 +2,11 @@ import { describe, expect, it } from "vitest";
 import { createPriceAlertRequestSchema } from "./alerts.js";
 import { authSessionSchema, loginRequestSchema, registerRequestSchema } from "./auth.js";
 import {
+  brandListQuerySchema,
   categoryListQuerySchema,
+  createBrandRequestSchema,
   createCategoryRequestSchema,
+  updateBrandRequestSchema,
   updateCategoryRequestSchema
 } from "./catalog.js";
 import { moneySchema } from "./common.js";
@@ -94,6 +97,32 @@ describe("catalog contracts", () => {
 
     expect(parsed.limit).toBe(50);
     expect(parsed.status).toBe("active");
+  });
+
+  it("accepts brand payloads and trims names", () => {
+    const parsed = createBrandRequestSchema.parse({
+      name: "  Sony  ",
+      slug: "sony"
+    });
+
+    expect(parsed).toEqual({
+      name: "Sony",
+      slug: "sony"
+    });
+  });
+
+  it("rejects brand updates without fields", () => {
+    expect(() => updateBrandRequestSchema.parse({})).toThrow();
+  });
+
+  it("coerces brand list limits", () => {
+    const parsed = brandListQuerySchema.parse({
+      limit: "25",
+      q: "sony"
+    });
+
+    expect(parsed.limit).toBe(25);
+    expect(parsed.q).toBe("sony");
   });
 });
 

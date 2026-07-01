@@ -20,7 +20,7 @@ Ja implementado:
 - Auth inicial com cadastro e login por e-mail/senha.
 - Endpoint autenticado `GET /auth/me`.
 - RBAC simples com guards para `user`, `admin` e `owner`.
-- CRUD administrativo inicial de categorias.
+- CRUD administrativo inicial de categorias e marcas.
 - Senhas com Argon2id.
 - Access token JWT HS256 com segredo obrigatorio em producao.
 - CI com lint, typecheck, testes, build e smoke test da API compilada.
@@ -30,7 +30,7 @@ Ainda pendente antes de producao:
 - Verificacao de e-mail.
 - Refresh token, rotacao e revogacao de sessao.
 - Rate limit em auth e endpoints publicos.
-- CRUD administrativo de marcas, produtos, variacoes, lojas, ofertas e snapshots.
+- CRUD administrativo de produtos, variacoes, lojas, ofertas e snapshots.
 - Auditoria administrativa.
 - OpenAPI publicado.
 - Logs estruturados, correlation id e observabilidade.
@@ -165,6 +165,11 @@ Endpoints disponiveis:
 - `GET /admin/categories/:id`
 - `PATCH /admin/categories/:id`
 - `DELETE /admin/categories/:id`
+- `GET /admin/brands`
+- `POST /admin/brands`
+- `GET /admin/brands/:id`
+- `PATCH /admin/brands/:id`
+- `DELETE /admin/brands/:id`
 
 Exemplo de cadastro:
 
@@ -207,7 +212,7 @@ Cobertura atual de validacao:
 - Login invalido retornando `401`.
 - Token ausente retornando `401`.
 - Usuario sem permissao retornando `403`.
-- CRUD administrativo de categorias validado com PostgreSQL real.
+- CRUD administrativo de categorias e marcas validado com PostgreSQL real.
 - Hash de senha validado com Argon2id.
 - JWT validado com issuer, audience, subject e claims.
 
@@ -222,7 +227,8 @@ Marco 1 - Backend base e admin minimo:
 - Auth com e-mail e senha. Base implementada.
 - RBAC simples: `user`, `admin`, `owner`. Base implementada.
 - CRUD de categorias. Base implementada.
-- CRUD de marcas, produtos, variacoes e lojas.
+- CRUD de marcas. Base implementada.
+- CRUD de produtos, variacoes e lojas.
 - CRUD de ofertas.
 - Registro manual de snapshots de preco.
 - Auditoria basica de acoes administrativas.
