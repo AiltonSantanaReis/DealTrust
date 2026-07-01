@@ -73,7 +73,7 @@ describe.skipIf(!testDatabaseUrl)("POST /auth", () => {
 
   it("registers a user, stores a password hash, rejects duplicates and logs in", async () => {
     const email = "auth.flow@example.com";
-    const password = "correct-horse-battery-123";
+    const password = "ValidTestPassword123!";
 
     const invalidPayloadResponse = await injectJson("POST", "/auth/register", {
       name: "A",
@@ -132,7 +132,7 @@ describe.skipIf(!testDatabaseUrl)("POST /auth", () => {
 
     const wrongPasswordResponse = await injectJson("POST", "/auth/login", {
       email,
-      password: "wrong-password-123"
+      password: "InvalidTestPassword123!"
     });
 
     expect(wrongPasswordResponse.statusCode).toBe(401);

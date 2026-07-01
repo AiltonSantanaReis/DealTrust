@@ -29,7 +29,7 @@ Objetivo: o usuario entende se o preco e bom.
 - Busca de produtos com filtros simples.
 - Pagina de produto com preco atual, lojas e historico.
 - Grafico de 7, 30, 90 e 180 dias.
-- Selos: menor preco historico, boa oportunidade, aguarde, loja suspeita.
+- Indicadores: menor preco historico, boa oportunidade, aguarde e confiabilidade da loja.
 - Calculo de preco final com frete, cupom e cashback confirmado quando existir.
 
 ## Marco 3 - Alertas e recorrencia
@@ -70,4 +70,3 @@ Objetivo: reduzir trabalho manual sem perder confianca.
 - Admin corrige loja, produto, oferta e snapshot.
 - Logs e falhas principais aparecem para operacao.
 - Testes automatizados cobrem regras criticas.
-

@@ -168,7 +168,7 @@ describe.skipIf(!testDatabaseUrl)("admin brands", () => {
     const response = await injectJson("POST", "/auth/register", undefined, {
       name: "Brand Test User",
       email,
-      password: "correct-horse-battery-123"
+      password: "ValidTestPassword123!"
     });
 
     expect(response.statusCode).toBe(201);

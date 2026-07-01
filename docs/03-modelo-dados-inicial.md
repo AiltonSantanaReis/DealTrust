@@ -41,7 +41,7 @@ Preco atual abaixo da media dos ultimos 30 ou 90 dias, respeitando margem minima
 
 Preco atual igual ou inferior ao menor preco registrado na janela analisada.
 
-### Falsa promocao
+### Oferta potencialmente enganosa
 
 Indicio de aumento artificial antes do desconto ou desconto baseado em preco de referencia inconsistente.
 
@@ -69,4 +69,3 @@ Combinar dominio validado, reputacao, historico interno, consistencia de ofertas
 - PriceAlertTriggered
 - NotificationRequested
 - StoreBlocked
-

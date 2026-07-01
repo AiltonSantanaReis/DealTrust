@@ -50,9 +50,8 @@ Medir desde cedo:
 
 Prioridade:
 
-1. Regras de preco bom, menor historico e falsa promocao.
+1. Regras de preco bom, menor historico e oferta potencialmente enganosa.
 2. Alertas de preco.
 3. Matching de produto e variacao.
 4. Permissoes administrativas.
 5. Fluxos web criticos com Playwright.
-

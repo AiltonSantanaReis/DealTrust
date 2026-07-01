@@ -11,7 +11,12 @@ import {
 } from "./catalog.js";
 import { moneySchema } from "./common.js";
 import { createOfferRequestSchema } from "./offers.js";
-import { productSearchQuerySchema } from "./products.js";
+import {
+  adminProductListQuerySchema,
+  createAdminProductRequestSchema,
+  productSearchQuerySchema,
+  updateAdminProductRequestSchema
+} from "./products.js";
 
 const productVariantId = "53cf458e-8c72-48f4-bcd4-9b4a8d649c7c";
 const storeId = "2f93c130-e845-47db-9472-6d5c1ac6f9ab";
@@ -19,22 +24,22 @@ const storeId = "2f93c130-e845-47db-9472-6d5c1ac6f9ab";
 describe("auth contracts", () => {
   it("normalizes registration email and name", () => {
     const parsed = registerRequestSchema.parse({
-      name: "  Ailton Reis  ",
-      email: "  AILTON@EXAMPLE.COM ",
-      password: "correct-horse-123"
+      name: "  Example User  ",
+      email: "  USER@EXAMPLE.COM ",
+      password: "ValidTestPassword123!"
     });
 
     expect(parsed).toEqual({
-      name: "Ailton Reis",
-      email: "ailton@example.com",
-      password: "correct-horse-123"
+      name: "Example User",
+      email: "user@example.com",
+      password: "ValidTestPassword123!"
     });
   });
 
   it("rejects short login passwords", () => {
     expect(() =>
       loginRequestSchema.parse({
-        email: "ailton@example.com",
+        email: "user@example.com",
         password: "short"
       })
     ).toThrow();
@@ -48,8 +53,8 @@ describe("auth contracts", () => {
       expiresInSeconds: 900,
       user: {
         id: "53cf458e-8c72-48f4-bcd4-9b4a8d649c7c",
-        name: "Ailton Reis",
-        email: "ailton@example.com",
+        name: "Example User",
+        email: "user@example.com",
         role: "user"
       }
     });
@@ -181,5 +186,30 @@ describe("product search contract", () => {
 
     expect(parsed.limit).toBe(50);
     expect(parsed.status).toBe("active");
+  });
+
+  it("defaults admin products to draft status", () => {
+    const parsed = createAdminProductRequestSchema.parse({
+      categoryId: "53cf458e-8c72-48f4-bcd4-9b4a8d649c7c",
+      brandId: "2f93c130-e845-47db-9472-6d5c1ac6f9ab",
+      name: "Demo Console Pro"
+    });
+
+    expect(parsed.status).toBe("draft");
+  });
+
+  it("rejects admin product updates without fields", () => {
+    expect(() => updateAdminProductRequestSchema.parse({})).toThrow();
+  });
+
+  it("accepts admin product filters", () => {
+    const parsed = adminProductListQuerySchema.parse({
+      limit: "25",
+      status: "draft",
+      categoryId: "53cf458e-8c72-48f4-bcd4-9b4a8d649c7c"
+    });
+
+    expect(parsed.limit).toBe(25);
+    expect(parsed.status).toBe("draft");
   });
 });

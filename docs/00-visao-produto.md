@@ -9,7 +9,7 @@ DealTrust deve ser uma central de decisao de compra. O produto ajuda o usuario a
 - Promocoes falsas baseadas em preco de referencia artificial.
 - Dificuldade de comparar preco final com frete, cupom e cashback confirmado.
 - Falta de historico confiavel para decidir o melhor momento de compra.
-- Risco de compra em loja suspeita.
+- Risco de compra em loja com sinais de baixa confiabilidade.
 - Dificuldade de monitorar produtos de alto valor ao longo do tempo.
 
 ## Publico inicial
@@ -17,7 +17,7 @@ DealTrust deve ser uma central de decisao de compra. O produto ajuda o usuario a
 - Compradores economicos que monitoram menor preco.
 - Gamers acompanhando consoles, jogos, placas, perifericos e assinaturas.
 - Familias comprando eletrodomesticos e itens de maior valor.
-- Usuarios desconfiados que querem evitar golpe e falsa promocao.
+- Usuarios que buscam reduzir risco de fraude e ofertas potencialmente enganosas.
 - Usuarios recorrentes que querem um radar diario de oportunidades reais.
 
 ## Escopo do MVP
@@ -54,4 +54,3 @@ Comecar por categorias com alto valor percebido e historico facil de explicar:
 ## Regra de produto
 
 Se uma funcionalidade nao ajuda o usuario a confiar no preco, confiar na loja ou agir no momento certo, ela nao entra no primeiro ciclo.
-

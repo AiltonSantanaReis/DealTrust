@@ -1,54 +1,51 @@
 # DealTrust
 
-DealTrust e uma plataforma de inteligencia de compras, historico de precos e alertas confiaveis. O objetivo nao e apenas listar promocoes: o produto deve ajudar o usuario a decidir se um preco esta realmente bom, se a loja e confiavel e se vale comprar agora ou esperar.
+DealTrust é uma plataforma de inteligência de compras, histórico de preços e alertas. O objetivo do produto é apoiar decisões de compra com dados verificáveis, rastreabilidade operacional e critérios consistentes de qualidade de oferta.
 
-Frase guia: ajudar o usuario a nao ser enganado e comprar no melhor momento.
+## Status do Projeto
 
-## Status atual
+O projeto está em fase de fundação técnica e MVP inicial. A base atual ainda não deve ser considerada pronta para produção.
 
-Projeto em fundacao tecnica e MVP inicial. Ainda nao esta pronto para producao.
-
-Ja implementado:
+Recursos implementados:
 
 - Monorepo TypeScript com `pnpm workspaces`.
-- Backend NestJS + Fastify em `apps/api`.
+- Backend NestJS com adaptador Fastify em `apps/api`.
 - Contratos compartilhados com Zod em `packages/contracts`.
-- Regras puras de precificacao em `packages/core`.
-- Schema PostgreSQL inicial com Drizzle em `packages/db`.
-- Migrations versionadas e teste de integracao contra PostgreSQL real.
+- Regras de domínio isoladas em `packages/core`.
+- Schema PostgreSQL e migrations com Drizzle em `packages/db`.
 - Health check da API.
-- Auth inicial com cadastro e login por e-mail/senha.
-- Endpoint autenticado `GET /auth/me`.
-- RBAC simples com guards para `user`, `admin` e `owner`.
-- CRUD administrativo inicial de categorias e marcas.
-- Senhas com Argon2id.
-- Access token JWT HS256 com segredo obrigatorio em producao.
+- Cadastro, login e endpoint autenticado `GET /auth/me`.
+- Hash de senha com Argon2id.
+- Access token JWT HS256 com segredo obrigatório em produção.
+- RBAC simples para `user`, `admin` e `owner`.
+- CRUD administrativo inicial de categorias, marcas e produtos.
+- Testes unitários, contratos compartilhados e testes e2e com PostgreSQL real.
 - CI com lint, typecheck, testes, build e smoke test da API compilada.
 
-Ainda pendente antes de producao:
+Pendências antes de produção:
 
-- Verificacao de e-mail.
-- Refresh token, rotacao e revogacao de sessao.
-- Rate limit em auth e endpoints publicos.
-- CRUD administrativo de produtos, variacoes, lojas, ofertas e snapshots.
+- Verificação de e-mail.
+- Refresh token, rotação e revogação de sessão.
+- Rate limit em autenticação e endpoints públicos sensíveis.
+- CRUD administrativo de variações, lojas, ofertas e snapshots.
 - Auditoria administrativa.
 - OpenAPI publicado.
 - Logs estruturados, correlation id e observabilidade.
 
-## Stack
+## Stack Técnica
 
 | Camada | Escolha |
 | --- | --- |
-| Linguagem | TypeScript estrito |
+| Linguagem | TypeScript em modo estrito |
 | Runtime | Node.js 24 LTS |
 | Monorepo | pnpm workspaces |
 | Backend | NestJS + Fastify |
-| Validacao | Zod |
-| Banco | PostgreSQL |
-| ORM/migrations | Drizzle ORM |
-| Cache/filas planejadas | Valkey + BullMQ |
+| Validação | Zod |
+| Banco transacional | PostgreSQL |
+| ORM e migrations | Drizzle ORM |
+| Cache e filas planejadas | Valkey + BullMQ |
 | Testes | Vitest + testes e2e com PostgreSQL real |
-| Qualidade | Biome, TypeScript, CI GitHub Actions |
+| Qualidade | Biome, TypeScript e GitHub Actions |
 
 ## Estrutura
 
@@ -56,31 +53,31 @@ Ainda pendente antes de producao:
 apps/
   api/          API NestJS/Fastify
 packages/
-  core/         Regras de dominio puras e testaveis
+  core/         Regras de domínio puras e testáveis
   contracts/    Schemas, DTOs e tipos compartilhados
   db/           Schema, migrations e acesso ao PostgreSQL
 docs/
-  adr/          Decisoes arquiteturais
+  adr/          Decisões arquiteturais
 ```
 
-## Requisitos locais
+## Requisitos Locais
 
 - Node.js `>=24 <25`
 - pnpm `>=11 <12`
 - Git
 - Docker Desktop ou Docker Engine
 
-## Configuracao
+## Configuração
 
-Instale as dependencias:
+Instale as dependências:
 
 ```powershell
 pnpm install
 ```
 
-Crie o arquivo local de ambiente a partir de `.env.example` e ajuste os segredos quando necessario.
+Crie o arquivo local de ambiente a partir de `.env.example` e ajuste os segredos conforme o ambiente.
 
-Variaveis principais:
+Variáveis principais:
 
 ```env
 DATABASE_URL=postgres://dealtrust:dealtrust@localhost:5432/dealtrust
@@ -91,41 +88,41 @@ AUTH_JWT_SECRET=change-me-to-a-random-secret-with-at-least-32-chars
 AUTH_ACCESS_TOKEN_TTL_SECONDS=900
 ```
 
-Em `production`, `AUTH_JWT_SECRET` e obrigatorio e deve ser um segredo aleatorio com pelo menos 32 caracteres.
+Em `production`, `AUTH_JWT_SECRET` é obrigatório e deve ser um segredo aleatório com pelo menos 32 caracteres.
 
-## Ambiente local
+## Ambiente Local
 
-Suba os servicos:
+Suba os serviços de desenvolvimento:
 
 ```powershell
 docker compose up -d postgres postgres-test valkey mailpit
 ```
 
-Portas padrao:
+Portas padrão:
 
 - API: `3001`
-- PostgreSQL dev: `5432`
-- PostgreSQL test: `5433`
+- PostgreSQL de desenvolvimento: `5432`
+- PostgreSQL de teste: `5433`
 - Valkey: `6379`
 - Mailpit SMTP: `1025`
 - Mailpit UI: `8025`
 
 ## Comandos
 
-Validacao completa com PostgreSQL real:
+Validação completa com PostgreSQL real:
 
 ```powershell
 $env:TEST_DATABASE_URL='postgres://dealtrust:dealtrust@localhost:5433/dealtrust_test'
 pnpm verify
 ```
 
-Testes sem banco externo obrigatorio:
+Testes sem banco externo obrigatório:
 
 ```powershell
 pnpm test:run
 ```
 
-Sem `TEST_DATABASE_URL`, os testes de integracao que dependem de banco sao pulados de forma explicita.
+Sem `TEST_DATABASE_URL`, os testes de integração que dependem de banco são pulados de forma explícita.
 
 Testes apenas da API com PostgreSQL real:
 
@@ -152,9 +149,9 @@ API em desenvolvimento:
 pnpm --filter @dealtrust/api dev
 ```
 
-## API atual
+## API Atual
 
-Endpoints disponiveis:
+Endpoints disponíveis:
 
 - `GET /health`
 - `POST /auth/register`
@@ -170,18 +167,23 @@ Endpoints disponiveis:
 - `GET /admin/brands/:id`
 - `PATCH /admin/brands/:id`
 - `DELETE /admin/brands/:id`
+- `GET /admin/products`
+- `POST /admin/products`
+- `GET /admin/products/:id`
+- `PATCH /admin/products/:id`
+- `DELETE /admin/products/:id`
 
 Exemplo de cadastro:
 
 ```json
 {
-  "name": "Ailton Reis",
-  "email": "ailton@example.com",
-  "password": "correct-horse-battery-123"
+  "name": "Usuário Exemplo",
+  "email": "usuario@example.com",
+  "password": "SenhaExemploSegura123!"
 }
 ```
 
-Resposta de auth:
+Resposta de autenticação:
 
 ```json
 {
@@ -190,68 +192,71 @@ Resposta de auth:
   "expiresInSeconds": 900,
   "user": {
     "id": "<uuid>",
-    "name": "Ailton Reis",
-    "email": "ailton@example.com",
+    "name": "Usuário Exemplo",
+    "email": "usuario@example.com",
     "role": "user"
   }
 }
 ```
 
-## Qualidade e testes
+Observações operacionais:
 
-O projeto deve falhar de forma visivel quando algo estiver incorreto. A regra e nao mascarar erro de teste, banco, build ou contrato.
+- `DELETE /admin/categories/:id` e `DELETE /admin/products/:id` arquivam o registro.
+- `DELETE /admin/brands/:id` remove a marca quando ela não está vinculada a produtos.
+- Endpoints administrativos exigem token válido e role `admin` ou `owner`.
 
-Cobertura atual de validacao:
+## Qualidade e Validação
 
-- Contratos Zod de auth, ofertas, alertas, busca e dinheiro.
-- Regras de dominio de preco, desconto suspeito e oportunidade.
-- Schema Drizzle.
-- Migrations aplicadas em PostgreSQL real.
-- Health check e auth pela pilha real Nest/Fastify.
-- Cadastro duplicado retornando `409`.
-- Login invalido retornando `401`.
-- Token ausente retornando `401`.
-- Usuario sem permissao retornando `403`.
-- CRUD administrativo de categorias e marcas validado com PostgreSQL real.
+O projeto deve falhar de forma explícita quando contrato, banco, build ou teste estiver incorreto. Erros não devem ser mascarados durante desenvolvimento ou CI.
+
+Cobertura atual de validação:
+
+- Contratos Zod de autenticação, catálogo, ofertas, alertas, busca e dinheiro.
+- Regras de domínio de preço, desconto suspeito e oportunidade.
+- Schema Drizzle e migrations aplicadas em PostgreSQL real.
+- Health check e autenticação pela pilha real Nest/Fastify.
+- Respostas HTTP esperadas para payload inválido, token ausente, credencial inválida e permissão insuficiente.
+- CRUD administrativo de categorias, marcas e produtos validado com PostgreSQL real.
 - Hash de senha validado com Argon2id.
 - JWT validado com issuer, audience, subject e claims.
 
 ## Roadmap do MVP
 
-Marco 0 - Fundacao:
+Marco 0 - Fundação:
 
-- Repositorio, monorepo, Docker Compose, CI, docs, schema e testes base.
+- Repositório, monorepo, Docker Compose, CI, documentação, schema e testes base. Implementado.
 
-Marco 1 - Backend base e admin minimo:
+Marco 1 - Backend base e admin mínimo:
 
 - Auth com e-mail e senha. Base implementada.
 - RBAC simples: `user`, `admin`, `owner`. Base implementada.
 - CRUD de categorias. Base implementada.
 - CRUD de marcas. Base implementada.
-- CRUD de produtos, variacoes e lojas.
+- CRUD de produtos. Base implementada.
+- CRUD de variações e lojas.
 - CRUD de ofertas.
-- Registro manual de snapshots de preco.
-- Auditoria basica de acoes administrativas.
+- Registro manual de snapshots de preço.
+- Auditoria básica de ações administrativas.
 
-Marco 2 - Produto publico e historico:
+Marco 2 - Produto público e histórico:
 
 - Busca de produtos.
-- Pagina de produto com preco atual, lojas e historico.
-- Graficos de 7, 30, 90 e 180 dias.
-- Selos de menor preco historico, boa oportunidade e loja suspeita.
+- Página de produto com preço atual, lojas e histórico.
+- Gráficos de 7, 30, 90 e 180 dias.
+- Indicadores de preço histórico, oportunidade, disponibilidade e confiabilidade da loja.
 
-Marco 3 - Alertas e recorrencia:
+Marco 3 - Alertas e recorrência:
 
 - Favoritos e listas.
-- Alertas por preco alvo e queda percentual.
-- Worker de verificacao.
-- Notificacao por e-mail.
+- Alertas por preço alvo e queda percentual.
+- Worker de verificação.
+- Notificação por e-mail.
 
-## Documentos base
+## Documentos Base
 
-- [Visao do Produto](docs/00-visao-produto.md)
+- [Visão do Produto](docs/00-visao-produto.md)
 - [Stack e Arquitetura](docs/01-stack-arquitetura.md)
 - [Roadmap do MVP](docs/02-roadmap-mvp.md)
 - [Modelo de Dados Inicial](docs/03-modelo-dados-inicial.md)
-- [Praticas de Engenharia](docs/04-praticas-engenharia.md)
+- [Práticas de Engenharia](docs/04-praticas-engenharia.md)
 - [ADR 0001 - Stack Inicial](docs/adr/0001-stack-inicial.md)

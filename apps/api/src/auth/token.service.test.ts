@@ -19,8 +19,8 @@ const config: ApiConfig = {
 
 const user: AuthUser = {
   id: "53cf458e-8c72-48f4-bcd4-9b4a8d649c7c",
-  name: "Ailton Reis",
-  email: "ailton@example.com",
+  name: "Example User",
+  email: "user@example.com",
   role: "user"
 };
 
