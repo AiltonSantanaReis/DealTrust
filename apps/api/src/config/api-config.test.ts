@@ -10,7 +10,9 @@ describe("loadApiConfig", () => {
       port: 3001,
       databaseUrl: "postgres://dealtrust:dealtrust@localhost:5432/dealtrust",
       databaseMaxConnections: 10,
-      valkeyUrl: "redis://localhost:6379"
+      valkeyUrl: "redis://localhost:6379",
+      authJwtSecret: "dealtrust-local-development-secret-change-before-production",
+      authAccessTokenTtlSeconds: 900
     });
   });
 
@@ -20,12 +22,14 @@ describe("loadApiConfig", () => {
       API_PORT: "0",
       DATABASE_URL: "postgresql://dealtrust:dealtrust@localhost:5432/dealtrust_test",
       DATABASE_MAX_CONNECTIONS: "3",
-      VALKEY_URL: "redis://localhost:6379"
+      VALKEY_URL: "redis://localhost:6379",
+      AUTH_ACCESS_TOKEN_TTL_SECONDS: "1200"
     });
 
     expect(config.port).toBe(0);
     expect(config.databaseMaxConnections).toBe(3);
     expect(config.environment).toBe("test");
+    expect(config.authAccessTokenTtlSeconds).toBe(1200);
   });
 
   it("rejects invalid database URLs", () => {
@@ -42,5 +46,22 @@ describe("loadApiConfig", () => {
         API_PORT: "99999"
       })
     ).toThrow("Invalid API configuration");
+  });
+
+  it("requires an explicit JWT secret in production", () => {
+    expect(() =>
+      loadApiConfig({
+        NODE_ENV: "production"
+      })
+    ).toThrow("AUTH_JWT_SECRET is required in production");
+  });
+
+  it("loads an explicit production JWT secret", () => {
+    const config = loadApiConfig({
+      NODE_ENV: "production",
+      AUTH_JWT_SECRET: "production-secret-with-at-least-thirty-two-chars"
+    });
+
+    expect(config.authJwtSecret).toBe("production-secret-with-at-least-thirty-two-chars");
   });
 });

@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { createPriceAlertRequestSchema } from "./alerts.js";
-import { loginRequestSchema, registerRequestSchema } from "./auth.js";
+import { authSessionSchema, loginRequestSchema, registerRequestSchema } from "./auth.js";
 import { moneySchema } from "./common.js";
 import { createOfferRequestSchema } from "./offers.js";
 import { productSearchQuerySchema } from "./products.js";
@@ -30,6 +30,23 @@ describe("auth contracts", () => {
         password: "short"
       })
     ).toThrow();
+  });
+
+  it("accepts auth session responses", () => {
+    const parsed = authSessionSchema.parse({
+      accessToken:
+        "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiI1M2NmNDU4ZS04YzcyLTQ4ZjQtYmNkNC05YjRhOGQ2NDljN2MifQ.signature",
+      tokenType: "Bearer",
+      expiresInSeconds: 900,
+      user: {
+        id: "53cf458e-8c72-48f4-bcd4-9b4a8d649c7c",
+        name: "Ailton Reis",
+        email: "ailton@example.com",
+        role: "user"
+      }
+    });
+
+    expect(parsed.tokenType).toBe("Bearer");
   });
 });
 

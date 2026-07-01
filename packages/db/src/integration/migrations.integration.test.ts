@@ -15,10 +15,12 @@ import {
 } from "../schema/index.js";
 
 const testDatabaseUrl = process.env.TEST_DATABASE_URL;
+const schemaResetLockId = 332_001;
 
 describe.skipIf(!testDatabaseUrl)("database migrations integration", () => {
   let sqlClient: SqlClient | undefined;
   let db: Database;
+  let lockAcquired = false;
 
   beforeAll(async () => {
     const databaseUrl = requireTestDatabaseUrl(testDatabaseUrl);
@@ -28,12 +30,18 @@ describe.skipIf(!testDatabaseUrl)("database migrations integration", () => {
     });
     db = createDatabaseClient(sqlClient);
 
+    await acquireSchemaResetLock();
+    lockAcquired = true;
     await resetPublicSchema();
     await runMigrations(db);
   });
 
   afterAll(async () => {
     if (sqlClient) {
+      if (lockAcquired) {
+        await releaseSchemaResetLock();
+      }
+
       await sqlClient.end({ timeout: 1 });
     }
   });
@@ -146,6 +154,18 @@ describe.skipIf(!testDatabaseUrl)("database migrations integration", () => {
     await client`drop schema if exists drizzle cascade`;
     await client`drop schema if exists public cascade`;
     await client`create schema public`;
+  }
+
+  async function acquireSchemaResetLock(): Promise<void> {
+    const client = requireValue(sqlClient);
+
+    await client`select pg_advisory_lock(${schemaResetLockId})`;
+  }
+
+  async function releaseSchemaResetLock(): Promise<void> {
+    const client = requireValue(sqlClient);
+
+    await client`select pg_advisory_unlock(${schemaResetLockId})`;
   }
 });
 
