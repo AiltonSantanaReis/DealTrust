@@ -26,6 +26,7 @@ Recursos implementados:
 - Detalhe público de produto com variações, ofertas ativas, histórico recente e análise de preço.
 - Janelas de histórico de 7, 30, 90 e 180 dias para gráficos e indicadores.
 - Cálculo de preço final de snapshots com frete, cupom e cashback confirmado.
+- Alertas autenticados por preço alvo, queda percentual e menor histórico.
 - Testes unitários, contratos compartilhados e testes e2e com PostgreSQL real.
 - CI com lint, typecheck, testes, build e smoke test da API compilada.
 
@@ -169,6 +170,11 @@ Endpoints disponíveis:
 - `GET /auth/me`
 - `GET /products`
 - `GET /products/:id`
+- `GET /alerts`
+- `POST /alerts`
+- `GET /alerts/:id`
+- `PATCH /alerts/:id`
+- `DELETE /alerts/:id`
 - `GET /admin/categories`
 - `POST /admin/categories`
 - `GET /admin/categories/:id`
@@ -255,6 +261,7 @@ Cobertura atual de validação:
 - Auditoria administrativa validada em fluxo e2e com consulta por entidade.
 - Headers defensivos e rate limit global validados pela pilha real Nest/Fastify.
 - Busca, detalhe público, janelas de histórico e cálculo de preço final validados com PostgreSQL real.
+- Alertas autenticados validados com PostgreSQL real e isolamento por usuário.
 - Hash de senha validado com Argon2id.
 - JWT validado com issuer, audience, subject e claims.
 
@@ -288,7 +295,8 @@ Marco 2 - Produto público e histórico:
 Marco 3 - Alertas e recorrência:
 
 - Favoritos e listas.
-- Alertas por preço alvo e queda percentual.
+- Alertas por preço alvo e queda percentual. Base implementada.
+- Alertas de menor histórico. Base implementada.
 - Worker de verificação.
 - Notificação por e-mail.
 

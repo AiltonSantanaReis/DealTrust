@@ -1,5 +1,10 @@
 import { describe, expect, it } from "vitest";
-import { createPriceAlertRequestSchema } from "./alerts.js";
+import {
+  createPriceAlertRequestSchema,
+  priceAlertListQuerySchema,
+  priceAlertResponseSchema,
+  updatePriceAlertRequestSchema
+} from "./alerts.js";
 import { adminAuditLogListQuerySchema } from "./audit.js";
 import { authSessionSchema, loginRequestSchema, registerRequestSchema } from "./auth.js";
 import {
@@ -232,6 +237,37 @@ describe("alert contracts", () => {
         dropPercent: 95
       })
     ).toThrow();
+  });
+
+  it("accepts alert list filters", () => {
+    const parsed = priceAlertListQuerySchema.parse({
+      limit: "25",
+      status: "active",
+      productVariantId
+    });
+
+    expect(parsed.limit).toBe(25);
+    expect(parsed.status).toBe("active");
+  });
+
+  it("rejects empty alert updates", () => {
+    expect(() => updatePriceAlertRequestSchema.parse({})).toThrow();
+  });
+
+  it("accepts price alert responses", () => {
+    const parsed = priceAlertResponseSchema.parse({
+      id: "d37d891d-90ce-4d39-88d6-0e898ac2eb1e",
+      productVariantId,
+      type: "target_price",
+      targetPrice: { amountCents: 199_90, currency: "BRL" },
+      dropPercent: null,
+      status: "active",
+      lastTriggeredAt: null,
+      createdAt: "2026-01-01T10:00:00.000Z",
+      updatedAt: "2026-01-01T10:00:00.000Z"
+    });
+
+    expect(parsed.type).toBe("target_price");
   });
 });
 

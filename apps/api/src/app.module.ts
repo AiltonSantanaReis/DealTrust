@@ -1,4 +1,5 @@
 import { Module } from "@nestjs/common";
+import { AlertsModule } from "./alerts/alerts.module.js";
 import { AuditModule } from "./audit/audit.module.js";
 import { AuthModule } from "./auth/auth.module.js";
 import { CatalogModule } from "./catalog/catalog.module.js";
@@ -17,6 +18,7 @@ import { StoresModule } from "./stores/stores.module.js";
     HealthModule,
     AuthModule,
     AuditModule,
+    AlertsModule,
     CatalogModule,
     OffersModule,
     StoresModule
