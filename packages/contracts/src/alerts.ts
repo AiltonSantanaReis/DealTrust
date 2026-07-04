@@ -59,6 +59,35 @@ export const priceAlertListResponseSchema = z.object({
   items: z.array(priceAlertResponseSchema)
 });
 
+export const priceAlertVerificationReasonSchema = z.enum([
+  "target_price_reached",
+  "drop_percent_reached",
+  "historical_low_reached"
+]);
+
+export const priceAlertVerificationRequestSchema = z.object({
+  limit: z.coerce.number().int().min(1).max(500).default(100)
+});
+
+export const priceAlertVerificationTriggeredAlertSchema = z.object({
+  id: publicIdSchema,
+  productVariantId: publicIdSchema,
+  type: priceAlertTypeSchema,
+  reason: priceAlertVerificationReasonSchema,
+  currentPrice: moneySchema,
+  referencePrice: moneySchema.nullable(),
+  thresholdPrice: moneySchema.nullable()
+});
+
+export const priceAlertVerificationResponseSchema = z.object({
+  scannedAlertCount: z.number().int().nonnegative(),
+  triggeredAlertCount: z.number().int().nonnegative(),
+  notificationCount: z.number().int().nonnegative(),
+  skippedAlertCount: z.number().int().nonnegative(),
+  processedAt: z.iso.datetime(),
+  triggeredAlerts: z.array(priceAlertVerificationTriggeredAlertSchema)
+});
+
 export type TargetPriceAlertRequest = z.infer<typeof targetPriceAlertRequestSchema>;
 export type DropPercentAlertRequest = z.infer<typeof dropPercentAlertRequestSchema>;
 export type HistoricalLowAlertRequest = z.infer<typeof historicalLowAlertRequestSchema>;
@@ -69,3 +98,9 @@ export type PriceAlertListQuery = z.infer<typeof priceAlertListQuerySchema>;
 export type UpdatePriceAlertRequest = z.infer<typeof updatePriceAlertRequestSchema>;
 export type PriceAlertResponse = z.infer<typeof priceAlertResponseSchema>;
 export type PriceAlertListResponse = z.infer<typeof priceAlertListResponseSchema>;
+export type PriceAlertVerificationReason = z.infer<typeof priceAlertVerificationReasonSchema>;
+export type PriceAlertVerificationRequest = z.infer<typeof priceAlertVerificationRequestSchema>;
+export type PriceAlertVerificationTriggeredAlert = z.infer<
+  typeof priceAlertVerificationTriggeredAlertSchema
+>;
+export type PriceAlertVerificationResponse = z.infer<typeof priceAlertVerificationResponseSchema>;

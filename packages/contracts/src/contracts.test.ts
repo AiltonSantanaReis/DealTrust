@@ -3,6 +3,8 @@ import {
   createPriceAlertRequestSchema,
   priceAlertListQuerySchema,
   priceAlertResponseSchema,
+  priceAlertVerificationRequestSchema,
+  priceAlertVerificationResponseSchema,
   updatePriceAlertRequestSchema
 } from "./alerts.js";
 import { adminAuditLogListQuerySchema } from "./audit.js";
@@ -274,6 +276,33 @@ describe("alert contracts", () => {
     });
 
     expect(parsed.type).toBe("target_price");
+  });
+
+  it("accepts price alert verification responses", () => {
+    const parsed = priceAlertVerificationResponseSchema.parse({
+      scannedAlertCount: 3,
+      triggeredAlertCount: 1,
+      notificationCount: 1,
+      skippedAlertCount: 2,
+      processedAt: "2026-01-01T10:00:00.000Z",
+      triggeredAlerts: [
+        {
+          id: "d37d891d-90ce-4d39-88d6-0e898ac2eb1e",
+          productVariantId,
+          type: "target_price",
+          reason: "target_price_reached",
+          currentPrice: { amountCents: 149_90, currency: "BRL" },
+          referencePrice: { amountCents: 199_90, currency: "BRL" },
+          thresholdPrice: { amountCents: 199_90, currency: "BRL" }
+        }
+      ]
+    });
+
+    expect(parsed.triggeredAlertCount).toBe(1);
+  });
+
+  it("coerces price alert verification limits", () => {
+    expect(priceAlertVerificationRequestSchema.parse({ limit: "250" }).limit).toBe(250);
   });
 });
 

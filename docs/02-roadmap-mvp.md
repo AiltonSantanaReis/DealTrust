@@ -42,7 +42,7 @@ Objetivo: validar retorno recorrente do usuário.
 - Alerta por preço alvo.
 - Alerta por queda percentual.
 - Alerta por menor preço histórico.
-- Worker de verificação de alertas.
+- Worker de verificação de alertas. Base implementada.
 - Notificação por e-mail.
 - Push web/mobile quando o app estiver pronto.
 

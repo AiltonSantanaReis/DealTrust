@@ -28,6 +28,7 @@ Recursos implementados:
 - Cálculo de preço final de snapshots com frete, cupom e cashback confirmado.
 - Favoritos e listas autenticados com isolamento por usuário.
 - Alertas autenticados por preço alvo, queda percentual e menor histórico.
+- Worker administrativo de verificação de alertas com geração de notificações pendentes.
 - Testes unitários, contratos compartilhados e testes e2e com PostgreSQL real.
 - CI com lint, typecheck, testes, build e smoke test da API compilada.
 
@@ -176,6 +177,7 @@ Endpoints disponíveis:
 - `GET /alerts/:id`
 - `PATCH /alerts/:id`
 - `DELETE /alerts/:id`
+- `POST /admin/alerts/verify`
 - `GET /favorite-lists`
 - `POST /favorite-lists`
 - `GET /favorite-lists/:id`
@@ -251,7 +253,9 @@ Observações operacionais:
 - `DELETE /admin/offers/:id` marca a oferta como expirada, preservando o histórico.
 - Endpoints administrativos exigem token válido e role `admin` ou `owner`.
 - `GET /admin/audit-logs` exige role `owner`.
+- `POST /admin/alerts/verify` exige role `admin` ou `owner` e dispara uma execução manual do worker de verificação de alertas.
 - A auditoria administrativa registra antes/depois, campos alterados, ator, entidade e contexto HTTP sem armazenar segredos.
+- A verificação de alertas cria notificações internas pendentes; a entrega por e-mail ainda não está implementada.
 - O rate limit atual é uma proteção local por instância; a versão distribuída com Valkey permanece como requisito antes de produção.
 
 ## Qualidade e Validação
@@ -271,6 +275,7 @@ Cobertura atual de validação:
 - Busca, detalhe público, janelas de histórico e cálculo de preço final validados com PostgreSQL real.
 - Alertas autenticados validados com PostgreSQL real e isolamento por usuário.
 - Favoritos e listas validados com PostgreSQL real, ownership por usuário e bloqueio de variações inativas.
+- Worker de alertas validado com PostgreSQL real, auditoria administrativa, idempotência e geração de notificações pendentes.
 - Hash de senha validado com Argon2id.
 - JWT validado com issuer, audience, subject e claims.
 
@@ -306,7 +311,7 @@ Marco 3 - Alertas e recorrência:
 - Favoritos e listas. Base implementada.
 - Alertas por preço alvo e queda percentual. Base implementada.
 - Alertas de menor histórico. Base implementada.
-- Worker de verificação.
+- Worker de verificação. Base implementada.
 - Notificação por e-mail.
 
 ## Documentos Base
