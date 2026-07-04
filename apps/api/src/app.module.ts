@@ -5,6 +5,7 @@ import { AuthModule } from "./auth/auth.module.js";
 import { CatalogModule } from "./catalog/catalog.module.js";
 import { ApiConfigModule } from "./config/api-config.module.js";
 import { DatabaseModule } from "./database/database.module.js";
+import { FavoritesModule } from "./favorites/favorites.module.js";
 import { HealthModule } from "./health/health.module.js";
 import { OffersModule } from "./offers/offers.module.js";
 import { SecurityModule } from "./security/security.module.js";
@@ -19,6 +20,7 @@ import { StoresModule } from "./stores/stores.module.js";
     AuthModule,
     AuditModule,
     AlertsModule,
+    FavoritesModule,
     CatalogModule,
     OffersModule,
     StoresModule

@@ -17,6 +17,12 @@ import {
 } from "./catalog.js";
 import { moneySchema } from "./common.js";
 import {
+  createFavoriteListRequestSchema,
+  favoriteListItemResponseSchema,
+  favoriteListResponseSchema,
+  updateFavoriteListRequestSchema
+} from "./favorites.js";
+import {
   adminOfferListQuerySchema,
   createAdminOfferRequestSchema,
   createAdminPriceSnapshotRequestSchema,
@@ -268,6 +274,53 @@ describe("alert contracts", () => {
     });
 
     expect(parsed.type).toBe("target_price");
+  });
+});
+
+describe("favorite list contracts", () => {
+  it("defaults favorite lists to private visibility", () => {
+    const parsed = createFavoriteListRequestSchema.parse({
+      name: "  Produtos acompanhados  "
+    });
+
+    expect(parsed).toEqual({
+      name: "Produtos acompanhados",
+      visibility: "private"
+    });
+  });
+
+  it("rejects empty favorite list updates", () => {
+    expect(() => updateFavoriteListRequestSchema.parse({})).toThrow();
+  });
+
+  it("accepts favorite list responses with product variant metadata", () => {
+    const item = favoriteListItemResponseSchema.parse({
+      productVariantId,
+      productId,
+      productName: "Demo Console Pro",
+      productStatus: "active",
+      variant: {
+        color: "Black",
+        voltage: "bivolt",
+        memory: "1 TB",
+        size: null,
+        edition: null,
+        status: "active"
+      },
+      createdAt: "2026-01-01T10:00:00.000Z"
+    });
+
+    const parsed = favoriteListResponseSchema.parse({
+      id: "d37d891d-90ce-4d39-88d6-0e898ac2eb1e",
+      name: "Produtos acompanhados",
+      visibility: "private",
+      itemCount: 1,
+      items: [item],
+      createdAt: "2026-01-01T10:00:00.000Z",
+      updatedAt: "2026-01-01T10:00:00.000Z"
+    });
+
+    expect(parsed.itemCount).toBe(1);
   });
 });
 

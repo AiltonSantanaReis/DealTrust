@@ -35,6 +35,8 @@ Principais endpoints atuais:
 - `GET /products`
 - `GET /products/:id`
 - `GET|POST|PATCH|DELETE /alerts`
+- `GET|POST|PATCH|DELETE /favorite-lists`
+- `POST|DELETE /favorite-lists/:id/items`
 - `GET|POST|PATCH|DELETE /admin/categories`
 - `GET|POST|PATCH|DELETE /admin/brands`
 - `GET|POST|PATCH|DELETE /admin/products`

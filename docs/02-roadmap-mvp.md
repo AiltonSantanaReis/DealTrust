@@ -38,7 +38,7 @@ Objetivo: apresentar evidências objetivas para apoiar a decisão de compra.
 
 Objetivo: validar retorno recorrente do usuário.
 
-- Favoritos e listas.
+- Favoritos e listas. Base implementada.
 - Alerta por preço alvo.
 - Alerta por queda percentual.
 - Alerta por menor preço histórico.
