@@ -25,6 +25,10 @@ import {
   updateFavoriteListRequestSchema
 } from "./favorites.js";
 import {
+  notificationDeliveryRequestSchema,
+  notificationDeliveryResponseSchema
+} from "./notifications.js";
+import {
   adminOfferListQuerySchema,
   createAdminOfferRequestSchema,
   createAdminPriceSnapshotRequestSchema,
@@ -350,6 +354,24 @@ describe("favorite list contracts", () => {
     });
 
     expect(parsed.itemCount).toBe(1);
+  });
+});
+
+describe("notification contracts", () => {
+  it("coerces notification delivery limits", () => {
+    expect(notificationDeliveryRequestSchema.parse({ limit: "50" }).limit).toBe(50);
+  });
+
+  it("accepts notification delivery responses", () => {
+    const parsed = notificationDeliveryResponseSchema.parse({
+      scannedNotificationCount: 2,
+      sentNotificationCount: 1,
+      failedNotificationCount: 1,
+      skippedNotificationCount: 0,
+      processedAt: "2026-01-01T10:00:00.000Z"
+    });
+
+    expect(parsed.sentNotificationCount).toBe(1);
   });
 });
 

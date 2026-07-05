@@ -43,7 +43,7 @@ Objetivo: validar retorno recorrente do usuário.
 - Alerta por queda percentual.
 - Alerta por menor preço histórico.
 - Worker de verificação de alertas. Base implementada.
-- Notificação por e-mail.
+- Notificação por e-mail. Base implementada.
 - Push web/mobile quando o app estiver pronto.
 
 ## Marco 4 - Radar de ofertas reais

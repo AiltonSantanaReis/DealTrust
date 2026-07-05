@@ -16,7 +16,13 @@ describe("loadApiConfig", () => {
       apiBodyLimitBytes: 1_048_576,
       apiRateLimitWindowSeconds: 60,
       apiRateLimitMaxRequests: 300,
-      apiCorsOrigins: []
+      apiCorsOrigins: [],
+      smtpHost: "localhost",
+      smtpPort: 1025,
+      smtpSecure: false,
+      smtpUser: "",
+      smtpPassword: "",
+      mailFrom: "dev@dealtrust.local"
     });
   });
 
@@ -31,7 +37,13 @@ describe("loadApiConfig", () => {
       API_BODY_LIMIT_BYTES: "2097152",
       API_RATE_LIMIT_WINDOW_SECONDS: "30",
       API_RATE_LIMIT_MAX_REQUESTS: "120",
-      API_CORS_ORIGINS: "https://app.example.com,https://admin.example.com"
+      API_CORS_ORIGINS: "https://app.example.com,https://admin.example.com",
+      SMTP_HOST: "smtp.example.com",
+      SMTP_PORT: "465",
+      SMTP_SECURE: "true",
+      SMTP_USER: "mailer",
+      SMTP_PASSWORD: "mailer-password",
+      MAIL_FROM: "alerts@example.com"
     });
 
     expect(config.port).toBe(0);
@@ -42,6 +54,12 @@ describe("loadApiConfig", () => {
     expect(config.apiRateLimitWindowSeconds).toBe(30);
     expect(config.apiRateLimitMaxRequests).toBe(120);
     expect(config.apiCorsOrigins).toEqual(["https://app.example.com", "https://admin.example.com"]);
+    expect(config.smtpHost).toBe("smtp.example.com");
+    expect(config.smtpPort).toBe(465);
+    expect(config.smtpSecure).toBe(true);
+    expect(config.smtpUser).toBe("mailer");
+    expect(config.smtpPassword).toBe("mailer-password");
+    expect(config.mailFrom).toBe("alerts@example.com");
   });
 
   it("rejects invalid database URLs", () => {

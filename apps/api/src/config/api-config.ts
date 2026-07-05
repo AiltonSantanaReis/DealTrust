@@ -27,6 +27,8 @@ const redisUrlSchema = z.string().refine(
   { message: "must be a valid redis:// or rediss:// URL" }
 );
 
+const booleanStringSchema = z.enum(["true", "false"]).default("false");
+
 const apiConfigSchema = z.object({
   NODE_ENV: z.enum(["development", "test", "production"]).default("development"),
   API_PORT: z.coerce.number().int().min(0).max(65_535).default(3001),
@@ -40,7 +42,13 @@ const apiConfigSchema = z.object({
   API_BODY_LIMIT_BYTES: z.coerce.number().int().min(16_384).max(10_485_760).default(1_048_576),
   API_RATE_LIMIT_WINDOW_SECONDS: z.coerce.number().int().min(1).max(3_600).default(60),
   API_RATE_LIMIT_MAX_REQUESTS: z.coerce.number().int().min(1).max(10_000).default(300),
-  API_CORS_ORIGINS: z.string().default("")
+  API_CORS_ORIGINS: z.string().default(""),
+  SMTP_HOST: z.string().trim().min(1).max(253).default("localhost"),
+  SMTP_PORT: z.coerce.number().int().min(1).max(65_535).default(1025),
+  SMTP_SECURE: booleanStringSchema,
+  SMTP_USER: z.string().default(""),
+  SMTP_PASSWORD: z.string().default(""),
+  MAIL_FROM: z.string().trim().min(3).max(254).default("dev@dealtrust.local")
 });
 
 export type ApiEnvironment = "development" | "test" | "production";
@@ -57,6 +65,12 @@ export type ApiConfig = {
   readonly apiRateLimitWindowSeconds: number;
   readonly apiRateLimitMaxRequests: number;
   readonly apiCorsOrigins: readonly string[];
+  readonly smtpHost: string;
+  readonly smtpPort: number;
+  readonly smtpSecure: boolean;
+  readonly smtpUser: string;
+  readonly smtpPassword: string;
+  readonly mailFrom: string;
 };
 
 export function loadApiConfig(env: NodeJS.ProcessEnv): ApiConfig {
@@ -85,7 +99,13 @@ export function loadApiConfig(env: NodeJS.ProcessEnv): ApiConfig {
     apiBodyLimitBytes: parsed.data.API_BODY_LIMIT_BYTES,
     apiRateLimitWindowSeconds: parsed.data.API_RATE_LIMIT_WINDOW_SECONDS,
     apiRateLimitMaxRequests: parsed.data.API_RATE_LIMIT_MAX_REQUESTS,
-    apiCorsOrigins: parseCorsOrigins(parsed.data.API_CORS_ORIGINS)
+    apiCorsOrigins: parseCorsOrigins(parsed.data.API_CORS_ORIGINS),
+    smtpHost: parsed.data.SMTP_HOST,
+    smtpPort: parsed.data.SMTP_PORT,
+    smtpSecure: parsed.data.SMTP_SECURE === "true",
+    smtpUser: parsed.data.SMTP_USER,
+    smtpPassword: parsed.data.SMTP_PASSWORD,
+    mailFrom: parsed.data.MAIL_FROM
   };
 }
 

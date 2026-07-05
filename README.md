@@ -29,6 +29,7 @@ Recursos implementados:
 - Favoritos e listas autenticados com isolamento por usuário.
 - Alertas autenticados por preço alvo, queda percentual e menor histórico.
 - Worker administrativo de verificação de alertas com geração de notificações pendentes.
+- Entrega administrativa de notificações pendentes por e-mail via SMTP.
 - Testes unitários, contratos compartilhados e testes e2e com PostgreSQL real.
 - CI com lint, typecheck, testes, build e smoke test da API compilada.
 
@@ -99,6 +100,12 @@ API_BODY_LIMIT_BYTES=1048576
 API_RATE_LIMIT_WINDOW_SECONDS=60
 API_RATE_LIMIT_MAX_REQUESTS=300
 API_CORS_ORIGINS=
+SMTP_HOST=localhost
+SMTP_PORT=1025
+SMTP_SECURE=false
+SMTP_USER=
+SMTP_PASSWORD=
+MAIL_FROM=dev@dealtrust.local
 ```
 
 Em `production`, `AUTH_JWT_SECRET` é obrigatório e deve ser um segredo aleatório com pelo menos 32 caracteres.
@@ -178,6 +185,7 @@ Endpoints disponíveis:
 - `PATCH /alerts/:id`
 - `DELETE /alerts/:id`
 - `POST /admin/alerts/verify`
+- `POST /admin/notifications/send-pending`
 - `GET /favorite-lists`
 - `POST /favorite-lists`
 - `GET /favorite-lists/:id`
@@ -254,8 +262,9 @@ Observações operacionais:
 - Endpoints administrativos exigem token válido e role `admin` ou `owner`.
 - `GET /admin/audit-logs` exige role `owner`.
 - `POST /admin/alerts/verify` exige role `admin` ou `owner` e dispara uma execução manual do worker de verificação de alertas.
+- `POST /admin/notifications/send-pending` exige role `admin` ou `owner` e processa notificações pendentes por e-mail via SMTP.
 - A auditoria administrativa registra antes/depois, campos alterados, ator, entidade e contexto HTTP sem armazenar segredos.
-- A verificação de alertas cria notificações internas pendentes; a entrega por e-mail ainda não está implementada.
+- A verificação de alertas cria notificações internas pendentes; a entrega por e-mail marca cada notificação como `sent` ou `failed`.
 - O rate limit atual é uma proteção local por instância; a versão distribuída com Valkey permanece como requisito antes de produção.
 
 ## Qualidade e Validação
@@ -276,6 +285,7 @@ Cobertura atual de validação:
 - Alertas autenticados validados com PostgreSQL real e isolamento por usuário.
 - Favoritos e listas validados com PostgreSQL real, ownership por usuário e bloqueio de variações inativas.
 - Worker de alertas validado com PostgreSQL real, auditoria administrativa, idempotência e geração de notificações pendentes.
+- Entrega de notificações por e-mail validada com PostgreSQL real, Mailpit e auditoria administrativa.
 - Hash de senha validado com Argon2id.
 - JWT validado com issuer, audience, subject e claims.
 
@@ -312,7 +322,7 @@ Marco 3 - Alertas e recorrência:
 - Alertas por preço alvo e queda percentual. Base implementada.
 - Alertas de menor histórico. Base implementada.
 - Worker de verificação. Base implementada.
-- Notificação por e-mail.
+- Notificação por e-mail. Base implementada.
 
 ## Documentos Base
 

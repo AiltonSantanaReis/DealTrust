@@ -18,7 +18,13 @@ const config: ApiConfig = {
   apiBodyLimitBytes: 1_048_576,
   apiRateLimitWindowSeconds: 60,
   apiRateLimitMaxRequests: 300,
-  apiCorsOrigins: []
+  apiCorsOrigins: [],
+  smtpHost: "localhost",
+  smtpPort: 1025,
+  smtpSecure: false,
+  smtpUser: "",
+  smtpPassword: "",
+  mailFrom: "dev@dealtrust.local"
 };
 
 const user: AuthUser = {
